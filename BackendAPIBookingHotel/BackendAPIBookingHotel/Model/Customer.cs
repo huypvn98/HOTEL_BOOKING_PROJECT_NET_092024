@@ -1,0 +1,13 @@
+﻿namespace BackendAPIBookingHotel.Model
+{
+	public class Customer
+	{
+		public int CustomerID {get; set;}
+		public DateTime RegistrationDate {get; set;}
+		public string CustomerSpecificInfo { get; set; }
+
+		public Person Person { get; set; }
+
+		public ICollection<Booking> Bookings { get; set; }
+	}
+}
