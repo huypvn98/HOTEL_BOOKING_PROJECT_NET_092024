@@ -1,12 +1,14 @@
-﻿namespace BackendAPIBookingHotel.Model
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BackendAPIBookingHotel.Model
 {
 	public class Admin
 	{
-		public int StaffID{get;set;}
-		public string Position{get;set;}
-		public DateTime? AssignedDate{get;set;}
-		public string AdminSpecificInfo{ get; set; }
-
-		public Person Person { get;set;}
-	}
+        [Key]
+        public int AdminID { get; set; }
+        public string Position { get; set; }
+        public DateTime? AssignedDate { get; set; }
+        public string AdminSpecificInfo { get; set; }
+    }
 }

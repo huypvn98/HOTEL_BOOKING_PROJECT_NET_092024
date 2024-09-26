@@ -11,7 +11,9 @@
 
 		public DateTime CreateDate { get; set; }
 
-		public Person Person { get; set; }
+		public Staff Staff { get; set; }
+		public Admin Admin { get; set; }
+		public Customer Customer { get; set; }
 
 		public ICollection<UserRole> UserRoles { get; set; }
 
