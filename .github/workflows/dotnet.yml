@@ -1,12 +1,15 @@
-name: .NET
+name: publish .Net
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
+  publish:
+    run-on: ubuntu-latest
   build:
     runs-on: ubuntu-latest
 
