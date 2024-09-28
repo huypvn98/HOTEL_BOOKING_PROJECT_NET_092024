@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace BookingHotel.Core.Persistence.Migrations
+namespace BookingHotel.Core.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDB : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -101,6 +101,21 @@ namespace BookingHotel.Core.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_BE072024_HB_Services", x => x.ServiceID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BE072024_HB_Users",
+                columns: table => new
+                {
+                    UserID = table.Column<int>(type: "int", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PasswordSalt = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BE072024_HB_Users", x => x.UserID);
                 });
 
             migrationBuilder.CreateTable(
@@ -234,6 +249,32 @@ namespace BookingHotel.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BE072024_HB_UserRoles",
+                columns: table => new
+                {
+                    UserRoleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserID = table.Column<int>(type: "int", nullable: false),
+                    RoleID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BE072024_HB_UserRoles", x => x.UserRoleId);
+                    table.ForeignKey(
+                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Roles_RoleID",
+                        column: x => x.RoleID,
+                        principalTable: "BE072024_HB_Roles",
+                        principalColumn: "RoleID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Users_UserID",
+                        column: x => x.UserID,
+                        principalTable: "BE072024_HB_Users",
+                        principalColumn: "UserID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BE072024_HB_BedRoom",
                 columns: table => new
                 {
@@ -329,43 +370,6 @@ namespace BookingHotel.Core.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BE072024_HB_Users",
-                columns: table => new
-                {
-                    UserID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordSalt = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    StaffID = table.Column<int>(type: "int", nullable: false),
-                    AdminID = table.Column<int>(type: "int", nullable: false),
-                    CustomerID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BE072024_HB_Users", x => x.UserID);
-                    table.ForeignKey(
-                        name: "FK_BE072024_HB_Users_BE072024_HB_Admins_AdminID",
-                        column: x => x.AdminID,
-                        principalTable: "BE072024_HB_Admins",
-                        principalColumn: "AdminID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BE072024_HB_Users_BE072024_HB_Customers_CustomerID",
-                        column: x => x.CustomerID,
-                        principalTable: "BE072024_HB_Customers",
-                        principalColumn: "CustomerID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BE072024_HB_Users_BE072024_HB_Staff_StaffID",
-                        column: x => x.StaffID,
-                        principalTable: "BE072024_HB_Staff",
-                        principalColumn: "StaffID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "BE072024_HB_BookingDetails",
                 columns: table => new
                 {
@@ -442,32 +446,6 @@ namespace BookingHotel.Core.Persistence.Migrations
                         column: x => x.BookingID,
                         principalTable: "BE072024_HB_Bookings",
                         principalColumn: "BookingID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BE072024_HB_UserRoles",
-                columns: table => new
-                {
-                    UserRoleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    RoleID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BE072024_HB_UserRoles", x => x.UserRoleId);
-                    table.ForeignKey(
-                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Roles_RoleID",
-                        column: x => x.RoleID,
-                        principalTable: "BE072024_HB_Roles",
-                        principalColumn: "RoleID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "BE072024_HB_Users",
-                        principalColumn: "UserID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -551,21 +529,6 @@ namespace BookingHotel.Core.Persistence.Migrations
                 name: "IX_BE072024_HB_UserRoles_UserID",
                 table: "BE072024_HB_UserRoles",
                 column: "UserID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BE072024_HB_Users_AdminID",
-                table: "BE072024_HB_Users",
-                column: "AdminID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BE072024_HB_Users_CustomerID",
-                table: "BE072024_HB_Users",
-                column: "CustomerID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BE072024_HB_Users_StaffID",
-                table: "BE072024_HB_Users",
-                column: "StaffID");
         }
 
         /// <inheritdoc />
@@ -573,6 +536,9 @@ namespace BookingHotel.Core.Persistence.Migrations
         {
             migrationBuilder.DropTable(
                 name: "BE072024_HB_Addresses");
+
+            migrationBuilder.DropTable(
+                name: "BE072024_HB_Admins");
 
             migrationBuilder.DropTable(
                 name: "BE072024_HB_BedRoom");
@@ -599,6 +565,9 @@ namespace BookingHotel.Core.Persistence.Migrations
                 name: "BE072024_HB_RoomDetails");
 
             migrationBuilder.DropTable(
+                name: "BE072024_HB_Staff");
+
+            migrationBuilder.DropTable(
                 name: "BE072024_HB_UserRoles");
 
             migrationBuilder.DropTable(
@@ -617,16 +586,10 @@ namespace BookingHotel.Core.Persistence.Migrations
                 name: "BE072024_HB_Users");
 
             migrationBuilder.DropTable(
-                name: "BE072024_HB_Rooms");
-
-            migrationBuilder.DropTable(
-                name: "BE072024_HB_Admins");
-
-            migrationBuilder.DropTable(
                 name: "BE072024_HB_Customers");
 
             migrationBuilder.DropTable(
-                name: "BE072024_HB_Staff");
+                name: "BE072024_HB_Rooms");
 
             migrationBuilder.DropTable(
                 name: "BE072024_HB_People");
