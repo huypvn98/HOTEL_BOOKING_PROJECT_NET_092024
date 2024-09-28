@@ -1,4 +1,4 @@
-name: publish .Net
+name: .NET
 
 on:
   workflow_dispatch:
@@ -9,10 +9,22 @@ on:
 
 jobs:
   publish:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore src/BookingHotel.sln
+    - name: Build
+      run: dotnet build src/BookingHotel.sln --no-restore
+    - name: Publish
+      run: dotnet publish src/BookingHotel.sln --no-build --output ./publish
+
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Setup .NET
