@@ -4,42 +4,47 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - develop
+    - develop
 
 env:
-  AZURE_WEBAPP_NAME: HotelBooking # Tên của ứng dụng Azure Web App
-  AZURE_WEBAPP_PACKAGE_PATH: "./publish" # Đường dẫn thư mục xuất bản
+  AZURE_WEBAPP_NAME: HotelBooking   # Tên của ứng dụng Azure Web App
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish"  # Đường dẫn thư mục xuất bản
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-
+    
     steps:
       # Bước checkout mã nguồn từ GitHub repo
       - uses: actions/checkout@v3
-
+      
       # Thiết lập SDK .NET
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "6.0.x"
-
+          dotnet-version: '6.0.x'
+      
       # Phục hồi các dependencies
       - name: Restore dependencies
         run: dotnet restore ./src/BookingHotel.sln
-
+        
       # Build ứng dụng
       - name: Build
         run: dotnet build ./src/BookingHotel.sln --configuration Release --no-restore
-
+      
       # Publish ứng dụng ra thư mục
       - name: Publish
         run: dotnet publish ./src/BookingHotel.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+      
+      # Đăng nhập Azure sử dụng Publish Profile
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_PUBLISH_PROFILE }}  # Sử dụng Azure Publish Profile từ GitHub Secrets
 
-      # Triển khai lên Azure App Service
+      # Triển khai lên Azure Web App
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }} # Tên ứng dụng web trong Azure
-          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }} # Lấy thông tin profile từ GitHub Secrets
-          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}" # Thư mục chứa ứng dụng đã publish
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}  # Tên ứng dụng web trong Azure
+          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"  # Thư mục chứa ứng dụng đã publish
