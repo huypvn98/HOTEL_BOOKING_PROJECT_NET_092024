@@ -1,39 +1,45 @@
-name: .NET
+name: Publish 🚀
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "develop" ]
-  pull_request:
-    branches: [ "develop" ]
+    branches:
+      - develop
+
+env:
+  AZURE_WEBAPP_NAME: HotelBooking # Tên của ứng dụng Azure Web App
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish" # Đường dẫn thư mục xuất bản
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore src/BookingHotel.sln
-    - name: Build
-      run: dotnet build src/BookingHotel.sln --no-restore
-    - name: Publish
-      run: dotnet publish src/BookingHotel.sln --no-build --output ./publish
 
-  build:
-    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore src/BookingHotel.sln
-    - name: Build
-      run: dotnet build src/BookingHotel.sln --no-restore
-    - name: Test
-      run: dotnet test src/BookingHotel.sln --no-build --verbosity normal
+      # Bước checkout mã nguồn từ GitHub repo
+      - uses: actions/checkout@v3
+
+      # Thiết lập SDK .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "6.0.x"
+
+      # Phục hồi các dependencies
+      - name: Restore dependencies
+        run: dotnet restore ./src/BookingHotel.sln
+
+      # Build ứng dụng
+      - name: Build
+        run: dotnet build ./src/BookingHotel.sln --configuration Release --no-restore
+
+      # Publish ứng dụng ra thư mục
+      - name: Publish
+        run: dotnet publish ./src/BookingHotel.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+
+      # Triển khai lên Azure App Service
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }} # Tên ứng dụng web trong Azure
+          publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }} # Lấy thông tin profile từ GitHub Secrets
+          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}" # Thư mục chứa ứng dụng đã publish
