@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace BookingHotel.Core.Persistence.Migrations
+namespace BookingHotel.Core.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
     partial class HotelBookingDbContextModelSnapshot : ModelSnapshot
@@ -550,19 +550,10 @@ namespace BookingHotel.Core.Persistence.Migrations
             modelBuilder.Entity("BackendAPIBookingHotel.Model.User", b =>
                 {
                     b.Property<int>("UserID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
-
-                    b.Property<int>("AdminID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("CustomerID")
-                        .HasColumnType("int");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -572,20 +563,11 @@ namespace BookingHotel.Core.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StaffID")
-                        .HasColumnType("int");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserID");
-
-                    b.HasIndex("AdminID");
-
-                    b.HasIndex("CustomerID");
-
-                    b.HasIndex("StaffID");
 
                     b.ToTable("BE072024_HB_Users");
                 });
@@ -775,33 +757,6 @@ namespace BookingHotel.Core.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Hotel");
-                });
-
-            modelBuilder.Entity("BackendAPIBookingHotel.Model.User", b =>
-                {
-                    b.HasOne("BackendAPIBookingHotel.Model.Admin", "Admin")
-                        .WithMany()
-                        .HasForeignKey("AdminID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BackendAPIBookingHotel.Model.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BackendAPIBookingHotel.Model.Staff", "Staff")
-                        .WithMany()
-                        .HasForeignKey("StaffID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Admin");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("BackendAPIBookingHotel.Model.UserRole", b =>

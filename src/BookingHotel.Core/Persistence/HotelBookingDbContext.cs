@@ -78,6 +78,9 @@ namespace BookingHotel.Core.Persistence
 
             modelBuilder.Entity<User>()
                 .HasKey(u => u.UserID);
+            modelBuilder.Entity<User>()
+            .Property(u => u.UserID)
+            .ValueGeneratedNever(); 
 
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => ur.UserRoleId);

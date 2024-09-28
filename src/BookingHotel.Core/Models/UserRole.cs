@@ -1,7 +1,9 @@
-﻿namespace BackendAPIBookingHotel.Model
+﻿using System.ComponentModel.DataAnnotations;
+namespace BackendAPIBookingHotel.Model
 {
 	public class UserRole
 	{
+		 [Key]
 		public int UserRoleId { get; set; }
 
 		public int UserID { get; set; }
