@@ -31,14 +31,6 @@ jobs:
       - name: Publish
         run: dotnet publish ./src/BookingHotel.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
       
-      # Đăng nhập Azure sử dụng Service Principal
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}  # Sử dụng thông tin xác thực từ GitHub Secrets
-          client-id: 5c51bed3-0125-405b-b560-c97e98587779  # Application (client) ID
-          tenant-id: 97bbfed4-df86-46ea-b8a5-85ead38140f7  # Directory (tenant) ID
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}  # Client secret từ GitHub Secrets (bạn phải thêm giá trị này)
 
       # Triển khai lên Azure Web App
       - name: Deploy to Azure Web App
