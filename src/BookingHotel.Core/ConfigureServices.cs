@@ -1,5 +1,5 @@
 ﻿using BookingHotel.Core.Persistence;
-
+using BookingHotel.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +23,8 @@ namespace BookingHotel.Core
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<AuthService>();
+            services.AddScoped<IRoomService, RoomService>();
+
             return services;
         }
     }

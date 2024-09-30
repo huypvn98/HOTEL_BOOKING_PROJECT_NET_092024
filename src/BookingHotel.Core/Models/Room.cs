@@ -9,7 +9,7 @@ namespace BackendAPIBookingHotel.Model
 		public int HotelID { get; set; }
 		public string RoomNumber { get; set; }
 		public int RoomSquare { get; set; }
-		public int IsActive { get; set; }
+		public bool IsActive { get; set; }
 
 		public Hotel Hotel { get; set; }
 		public ICollection<Booking> Bookings { get; set; }
