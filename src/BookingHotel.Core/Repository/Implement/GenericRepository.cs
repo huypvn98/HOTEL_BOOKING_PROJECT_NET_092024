@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using BookingHotel.Core.Persistence;
 using BookingHotel.Core.Repository.Interface;
@@ -46,6 +47,18 @@ namespace BookingHotel.Core.Repository.Implement
             {
                 _dbSet.Remove(entity);
             }
+        }
+
+      // Implement phương thức GetAsync với predicate
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.FirstOrDefaultAsync(predicate);
+        }
+
+        // Implement phương thức GetAllAsync với predicate
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.Where(predicate).ToListAsync();
         }
     }
 

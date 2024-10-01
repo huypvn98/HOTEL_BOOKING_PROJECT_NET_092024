@@ -52,6 +52,34 @@ namespace BookingHotel.Core.Persistence
             modelBuilder.Entity<Role>()
                 .HasKey(r => r.RoleID);
 
+            // Seed dữ liệu mặc định cho bảng Roles
+            modelBuilder.Entity<Role>().HasData(
+                new Role
+                {
+                    RoleID = 1,
+                    RoleName = "Admin",
+                    Description = "Administrator role with full permissions"
+                },
+                new Role
+                {
+                    RoleID = 2,
+                    RoleName = "User",
+                    Description = "Regular user with limited permissions"
+                },
+                new Role
+                {
+                    RoleID = 3,
+                    RoleName = "Customer",
+                    Description = "Customer role with permissions to book and view hotels"
+                },
+                new Role
+                {
+                    RoleID = 4,
+                    RoleName = "Staff",
+                    Description = "Staff role with permissions to manage hotel operations"
+                }
+            );
+
             modelBuilder.Entity<Service>()
                 .HasKey(s => s.ServiceID);
 
@@ -80,7 +108,7 @@ namespace BookingHotel.Core.Persistence
                 .HasKey(u => u.UserID);
             modelBuilder.Entity<User>()
             .Property(u => u.UserID)
-            .ValueGeneratedNever(); 
+            .ValueGeneratedNever();
 
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => ur.UserRoleId);

@@ -26,4 +26,24 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginDto model)
+    {
+        try
+        {
+            var tokens = await _authService.LoginAsync(model);
+            return Ok(new
+            {
+                AccessToken = tokens.AccessToken,
+                RefreshToken = tokens.RefreshToken,
+                UserInfo = tokens.UserInfo // Đảm bảo rằng thông tin người dùng cũng được trả về
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+
+    }
 }

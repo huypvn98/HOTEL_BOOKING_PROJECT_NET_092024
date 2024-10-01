@@ -1,0 +1,31 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+
+namespace BookingHotel.Api.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TestAuthorizeController : ControllerBase
+    {
+        [HttpGet("admin")]
+        [RoleAuthorize("1")] // Chỉ cho phép người dùng có RoleID là 1
+        public IActionResult GetAdminData()
+        {
+            // Chỉ người dùng có vai trò Admin mới có thể vào đây
+            return Ok(new { message = "This is admin data." });
+        }
+
+        [HttpGet("user")]
+        [RoleAuthorize("2")] // Chỉ cho phép người dùng có RoleID là 2
+        public IActionResult GetUserData()
+        {
+            return Ok(new { message = "This is user data." });
+        }
+    }
+
+}
