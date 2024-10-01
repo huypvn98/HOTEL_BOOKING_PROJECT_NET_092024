@@ -48,19 +48,31 @@ public class AuthService
             Username = model.UserName,
             PasswordHash = hashedPassword,
             PasswordSalt = Convert.ToBase64String(salt),  // Lưu salt
-            CreateDate = DateTime.UtcNow
+            CreateDate = DateTime.UtcNow.AddHours(7),
         };
         await _unitOfWork.Repository<User>().AddAsync(user);
         await _unitOfWork.SaveChangesAsync();
 
-        // Thêm Role cho User
+        // Thêm Role cho User là Customer
         var userRole = new UserRole
         {
             UserID = user.UserID,
-            RoleID = 2 // Gán role mặc định là User
+            RoleID = 3 // Gán role mặc định là User
         };
+        
         await _unitOfWork.Repository<UserRole>().AddAsync(userRole);
         await _unitOfWork.SaveChangesAsync();
+
+       // Gán vào Customer
+
+        var customer = new Customer {
+            CustomerID = user.UserID,
+            RegistrationDate = user.CreateDate,
+            CustomerSpecificInfo = string.Empty,
+        };
+        await _unitOfWork.Repository<Customer>().AddAsync(customer);
+        await _unitOfWork.SaveChangesAsync();
+
 
         return "User registered successfully!";
     }

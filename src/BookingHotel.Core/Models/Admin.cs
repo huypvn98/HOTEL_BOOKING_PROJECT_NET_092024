@@ -6,9 +6,9 @@ namespace BackendAPIBookingHotel.Model
 	public class Admin
 	{
         [Key]
-        public int AdminID { get; set; }
-        public string Position { get; set; }
+        public int? AdminID { get; set; }
+        public string? Position { get; set; }
         public DateTime? AssignedDate { get; set; }
-        public string AdminSpecificInfo { get; set; }
+        public string? AdminSpecificInfo { get; set; }
     }
 }

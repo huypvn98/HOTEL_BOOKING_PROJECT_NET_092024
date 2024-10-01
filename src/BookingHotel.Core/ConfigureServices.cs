@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Reflection;
 namespace BookingHotel.Core
 {
     public static class ConfigureServices
@@ -35,6 +36,7 @@ namespace BookingHotel.Core
             // Thêm Swagger
             services.AddSwaggerGen(opt =>
             {
+
                 opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyAPI", Version = "v1" });
                 opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -59,6 +61,18 @@ namespace BookingHotel.Core
                         new string[]{}
                     }
                 });
+
+                // Include XML comments if available
+                var xmlFiles = new[] { "BookingHotel.Core.xml", "BookingHotel.Api.xml" };
+                foreach (var xmlFile in xmlFiles)
+                {
+                    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                    if (File.Exists(xmlPath))
+                    {
+                        opt.IncludeXmlComments(xmlPath);
+                    }
+                }
+
             });
 
             services.AddDbContext<HotelBookingDbContext>(options =>
