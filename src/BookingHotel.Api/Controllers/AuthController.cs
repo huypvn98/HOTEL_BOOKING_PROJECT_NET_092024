@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using BookingHotel.Core.DTO;
-
+using Swashbuckle.AspNetCore.Annotations;
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -12,8 +12,15 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
-
+    /// <summary>
+    /// Registers a new customer.
+    /// </summary>
+    /// <param name="model">The registration details.</param>
+    /// <returns>A message indicating the result of the registration.</returns>
     [HttpPost("register")]
+    [SwaggerOperation(Summary = "Registers a new user", Description = "Registers a new user with the provided details.")]
+    [SwaggerResponse(200, "Registration successful", typeof(object))]
+    [SwaggerResponse(400, "Registration failed", typeof(object))]
     public async Task<IActionResult> Register(RegisterDto model)
     {
         try

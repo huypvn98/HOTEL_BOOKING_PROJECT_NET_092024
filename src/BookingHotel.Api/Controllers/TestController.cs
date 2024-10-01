@@ -20,8 +20,8 @@ namespace BookingHotel.Api.Controllers
             return Ok(new { message = "This is admin data." });
         }
 
-        [HttpGet("user")]
-        [RoleAuthorize("2")] // Chỉ cho phép người dùng có RoleID là 2
+        [HttpGet("customer")]
+        [RoleAuthorize("3")] // Chỉ cho phép người dùng có RoleID là 3
         public IActionResult GetUserData()
         {
             return Ok(new { message = "This is user data." });
