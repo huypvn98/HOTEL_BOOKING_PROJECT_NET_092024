@@ -22,24 +22,77 @@ namespace BookingHotel.Api.Controllers
             _unitOfWork= unitOfWork;
         }
 
-        // GET: api/<RoomController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+
 
         // GET api/<RoomController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            return "value";
+            var reponse= new RetureReponse();
+            try
+            {
+                var room = await _roomService.getRoomById(id);
+                if(room == null)
+                {
+                    reponse.returnCode = 404;
+                    reponse.returnMessage = "Không tìm thấy phòng";
+                    return NotFound(reponse);
+                }
+                var RoomDTO = new RoomDTO()
+                {
+                    hotelID = room.HotelID,
+                    roomNumber = room.RoomNumber,
+                    roomSquare = room.RoomSquare,
+                    isActive = room.IsActive,
+                };
+                return Ok(RoomDTO);
+            
+            }catch (Exception ex)
+            {
+                reponse.returnCode = 500;
+                reponse.returnMessage = "Lỗi dữ liệu "+ex.Message;
+                return BadRequest(reponse);
+            }
+          
         }
+        // GET api/<RoomController>/5
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var reponse = new RetureReponse();
+            try
+            {
+                var room = await _roomService.getAll();
+                
+               if (room.Count>0)
+                {
+                    var roomDTO = room.Select(x => new RoomDTO()
+                    {
+                        hotelID = x.HotelID,
+                        roomNumber = x.RoomNumber,
+                        roomSquare = x.RoomSquare,
+                        isActive = x.IsActive
+                    }) ;
+                    return Ok(roomDTO);
+                }
+                reponse.returnCode = 404;
+                reponse.returnMessage = "Không dữ liệu nào được tìm thấy";
+                return NotFound(reponse);
 
+            }
+            catch (Exception ex)
+            {
+                reponse.returnCode = 500;
+                reponse.returnMessage = "Lỗi dữ liệu " + ex.Message;
+                return BadRequest(reponse);
+            }
+
+        }
         // POST api/<RoomController>
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] RoomDTO roomRequest)
         {
+
             var returnRespone = new RetureReponse();
 
             try
@@ -49,7 +102,7 @@ namespace BookingHotel.Api.Controllers
                 {
                     returnRespone.returnCode = 404;
                     returnRespone.returnMessage = "Khách sạn không tìm thấy";
-                    return BadRequest(returnRespone);
+                    return NotFound(returnRespone);
                 }
                 returnRespone = _roomService.InsertRoom(roomRequest).Result;
                 return Ok(returnRespone);
@@ -60,5 +113,61 @@ namespace BookingHotel.Api.Controllers
            
         }
 
-    }
+        // POST api/<RoomController>
+        [HttpPut("Edit")]
+        public async Task<IActionResult> Edit(int id,[FromBody] RoomDTO roomRequest )
+        {
+            var returnRespone = new RetureReponse();
+
+            try
+            {
+                var room = await _roomService.getRoomById(id);
+                if (room == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Không tìm thấy phòng";
+                    return NotFound(returnRespone);
+                }
+                var hotel = _unitOfWork.Repository<Hotel>().GetByIdAsync(roomRequest.hotelID).Result;
+                if (hotel == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Khách sạn không tìm thấy";
+                    return BadRequest(returnRespone);
+                }
+                returnRespone = _roomService.UpdateRoom(id,roomRequest).Result;
+                return Ok(returnRespone);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Lỗi khi cập nhật dữ liệu " + ex.Message);
+            }
+
+        }
+        [HttpDelete("Delete")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            
+            var returnRespone = new RetureReponse();
+
+            try
+            {
+                var room = await _roomService.getRoomById(id);
+                if (room == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Không tìm thấy phòng";
+                    return NotFound(returnRespone);
+                }
+                await  _roomService.DeleteRoom(id);
+                returnRespone.returnCode = 200;
+                returnRespone.returnMessage = "Xóa phòng thành công";
+                return Ok(returnRespone);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Lỗi khi xóa dữ liệu " + ex.Message);
+            }
+        }
+        }
 }

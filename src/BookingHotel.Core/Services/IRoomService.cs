@@ -11,6 +11,7 @@ namespace BookingHotel.Core.Services
     public interface IRoomService
     {
         Task<List<Room>> getAll();
+        Task<Room> getRoomById(int id);
         Task<RetureReponse> InsertRoom(RoomDTO roomDTO);
         Task<RetureReponse> UpdateRoom(int idRoom, RoomDTO roomDTO);
         Task<RetureReponse> DeleteRoom(int idRoom);
