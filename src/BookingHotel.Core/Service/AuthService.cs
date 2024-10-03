@@ -48,7 +48,7 @@ public class AuthService
             Username = model.UserName,
             PasswordHash = hashedPassword,
             PasswordSalt = Convert.ToBase64String(salt),  // Lưu salt
-            CreateDate = DateTime.UtcNow.AddHours(7),
+            CreateDate =  DateTime.UtcNow.AddHours(7),
         };
         await _unitOfWork.Repository<User>().AddAsync(user);
         await _unitOfWork.SaveChangesAsync();
