@@ -70,7 +70,7 @@ public class AuthService
 
         if (user == null)
         {
-            throw new UnauthorizedAccessException("UserName not found");
+            throw new UnauthorizedAccessException("UserName Or Password is invalid!!!");
         }
 
         // Chuyển đổi PasswordSalt từ string sang byte[]
@@ -78,7 +78,7 @@ public class AuthService
 
         if (!VerifyPassword(model.Password, user.PasswordHash, saltBytes))
         {
-            throw new UnauthorizedAccessException("Password is incorrect!!!");
+            throw new UnauthorizedAccessException("UserName Or Password is invalid!!!");
         }
 
         // Lấy thông tin Person tương ứng với User
@@ -101,13 +101,21 @@ public class AuthService
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var accessToken = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: creds,
-            claims: claims
-        );
+         issuer: _configuration["Jwt:Issuer"],
+         audience: _configuration["Jwt:Audience"],
+         expires: DateTime.UtcNow.AddHours(7).AddMinutes(30), // Chuyển sang giờ Việt Nam và thêm 30 phút
+         signingCredentials: creds,
+         claims: claims
+     );
 
+        // Generate the Refresh Token
+        var refreshToken = GenerateRefreshToken();
+        user.RefreshToken = refreshToken;
+        user.RefreshToken_ExpriredTime = DateTime.UtcNow.AddHours(7).AddDays(7).ToString("yyyy-MM-dd HH:mm:ss"); // Set expiration time to 7 days later
+
+        // Save the Refresh Token in the User table
+        _unitOfWork.Repository<User>().UpdateAsync(user);
+        await _unitOfWork.SaveChangesAsync();
         // Tạo UserDto để trả về thông tin người dùng
         var userInfo = new UserDto
         {
@@ -118,7 +126,7 @@ public class AuthService
         };
 
         // Trả về Access Token, Refresh Token và thông tin người dùng
-        return (new JwtSecurityTokenHandler().WriteToken(accessToken), GenerateRefreshToken(), userInfo);
+        return (new JwtSecurityTokenHandler().WriteToken(accessToken), refreshToken, userInfo);
     }
 
     private (string hashedPassword, byte[] salt) HashPassword(string password)

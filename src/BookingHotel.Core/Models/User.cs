@@ -13,7 +13,13 @@ public class User
     public string PasswordHash { get; set; }
     public string PasswordSalt { get; set; }
 
+
     public DateTime CreateDate { get; set; }
+
+    
+    public string? RefreshToken { get; set; }
+
+    public string? RefreshToken_ExpriredTime{get; set;}
 
     public ICollection<UserRole> UserRoles { get; set; }
 }

@@ -13,7 +13,7 @@
 		public DateTime BookingDate {get ; set ;}
 		public DateTime CheckInDate {get ; set ;}
 		public DateTime CheckOutDate {get ; set ;}
-		public DateTime BookingStatus {get ; set ;}
+		public string BookingStatus {get ; set ;}
 		public int NumberOfDays { get; set; }
 
 

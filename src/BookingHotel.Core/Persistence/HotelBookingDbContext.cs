@@ -30,6 +30,8 @@ namespace BookingHotel.Core.Persistence
         public DbSet<Deposit> Deposits { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
 
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Thêm tiền tố "BE072024_HB_" cho tất cả các bảng
@@ -52,6 +54,7 @@ namespace BookingHotel.Core.Persistence
             modelBuilder.Entity<Role>()
                 .HasKey(r => r.RoleID);
 
+      
             // Seed dữ liệu mặc định cho bảng Roles
             modelBuilder.Entity<Role>().HasData(
                 new Role
@@ -173,6 +176,13 @@ namespace BookingHotel.Core.Persistence
             //    .WithMany(rd => rd.Rooms)
             //    .HasForeignKey(r => r.RoomDetailId)
             //    .OnDelete(DeleteBehavior.Restrict);
+
+            // Cấu hình 1-N giữa Permission và Role
+            modelBuilder.Entity<Role>()
+                .HasOne(r => r.Permission)   // Mỗi Role có một Permission
+                .WithMany(p => p.Roles)      // Một Permission có nhiều Role
+                .HasForeignKey(r => r.PermissionId)
+                .OnDelete(DeleteBehavior.Restrict); // Không cho phép xóa Permission nếu có Role liên kết
 
             modelBuilder.Entity<BedRoom>()
                .HasKey(br => new { br.RoomID, br.BedID });

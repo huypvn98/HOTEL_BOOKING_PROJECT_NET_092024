@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookingHotel.Core.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    [Migration("20241001021951_SeedingRolesData")]
-    partial class SeedingRolesData
+    [Migration("20241003010208_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,8 +115,9 @@ namespace BookingHotel.Core.Migrations
                     b.Property<DateTime>("BookingDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("BookingStatus")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("BookingStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CheckInDate")
                         .HasColumnType("datetime2");
@@ -418,14 +419,17 @@ namespace BookingHotel.Core.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleID"));
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PermissionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("RoleName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleID");
+
+                    b.HasIndex("PermissionId");
 
                     b.ToTable("BE072024_HB_Roles");
 
@@ -592,6 +596,12 @@ namespace BookingHotel.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken_ExpriredTime")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -622,6 +632,37 @@ namespace BookingHotel.Core.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("BE072024_HB_UserRoles");
+                });
+
+            modelBuilder.Entity("BookingHotel.Core.Models.Permission", b =>
+                {
+                    b.Property<int>("PermissionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionId"));
+
+                    b.Property<string>("Approve")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Create")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Delete")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Insert")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Screen_Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PermissionId");
+
+                    b.ToTable("BE072024_HB_Permission");
                 });
 
             modelBuilder.Entity("BackendAPIBookingHotel.Model.Address", b =>
@@ -755,6 +796,16 @@ namespace BookingHotel.Core.Migrations
                     b.Navigation("Person");
                 });
 
+            modelBuilder.Entity("BackendAPIBookingHotel.Model.Role", b =>
+                {
+                    b.HasOne("BookingHotel.Core.Models.Permission", "Permission")
+                        .WithMany("Roles")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Permission");
+                });
+
             modelBuilder.Entity("BackendAPIBookingHotel.Model.Room", b =>
                 {
                     b.HasOne("BackendAPIBookingHotel.Model.Hotel", "Hotel")
@@ -867,6 +918,11 @@ namespace BookingHotel.Core.Migrations
             modelBuilder.Entity("BackendAPIBookingHotel.Model.User", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("BookingHotel.Core.Models.Permission", b =>
+                {
+                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }
