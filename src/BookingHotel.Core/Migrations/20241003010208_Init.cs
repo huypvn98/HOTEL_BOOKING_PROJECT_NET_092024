@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace BookingHotel.Core.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -73,17 +75,21 @@ namespace BookingHotel.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BE072024_HB_Roles",
+                name: "BE072024_HB_Permission",
                 columns: table => new
                 {
-                    RoleID = table.Column<int>(type: "int", nullable: false)
+                    PermissionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Screen_Url = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Create = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Insert = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Delete = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Approve = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoleId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BE072024_HB_Roles", x => x.RoleID);
+                    table.PrimaryKey("PK_BE072024_HB_Permission", x => x.PermissionId);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,7 +117,9 @@ namespace BookingHotel.Core.Migrations
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordSalt = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshToken_ExpriredTime = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -249,28 +257,23 @@ namespace BookingHotel.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BE072024_HB_UserRoles",
+                name: "BE072024_HB_Roles",
                 columns: table => new
                 {
-                    UserRoleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<int>(type: "int", nullable: false),
                     RoleID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PermissionId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BE072024_HB_UserRoles", x => x.UserRoleId);
+                    table.PrimaryKey("PK_BE072024_HB_Roles", x => x.RoleID);
                     table.ForeignKey(
-                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Roles_RoleID",
-                        column: x => x.RoleID,
-                        principalTable: "BE072024_HB_Roles",
-                        principalColumn: "RoleID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "BE072024_HB_Users",
-                        principalColumn: "UserID",
+                        name: "FK_BE072024_HB_Roles_BE072024_HB_Permission_PermissionId",
+                        column: x => x.PermissionId,
+                        principalTable: "BE072024_HB_Permission",
+                        principalColumn: "PermissionId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -349,7 +352,7 @@ namespace BookingHotel.Core.Migrations
                     BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    BookingStatus = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BookingStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     NumberOfDays = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -366,6 +369,32 @@ namespace BookingHotel.Core.Migrations
                         column: x => x.RoomID,
                         principalTable: "BE072024_HB_Rooms",
                         principalColumn: "RoomID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BE072024_HB_UserRoles",
+                columns: table => new
+                {
+                    UserRoleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserID = table.Column<int>(type: "int", nullable: false),
+                    RoleID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BE072024_HB_UserRoles", x => x.UserRoleId);
+                    table.ForeignKey(
+                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Roles_RoleID",
+                        column: x => x.RoleID,
+                        principalTable: "BE072024_HB_Roles",
+                        principalColumn: "RoleID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BE072024_HB_UserRoles_BE072024_HB_Users_UserID",
+                        column: x => x.UserID,
+                        principalTable: "BE072024_HB_Users",
+                        principalColumn: "UserID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -449,6 +478,17 @@ namespace BookingHotel.Core.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.InsertData(
+                table: "BE072024_HB_Roles",
+                columns: new[] { "RoleID", "Description", "PermissionId", "RoleName" },
+                values: new object[,]
+                {
+                    { 1, "Administrator role with full permissions", null, "Admin" },
+                    { 2, "Regular user with limited permissions", null, "User" },
+                    { 3, "Customer role with permissions to book and view hotels", null, "Customer" },
+                    { 4, "Staff role with permissions to manage hotel operations", null, "Staff" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_BE072024_HB_Addresses_PersonID",
                 table: "BE072024_HB_Addresses",
@@ -503,6 +543,11 @@ namespace BookingHotel.Core.Migrations
                 name: "IX_BE072024_HB_Phones_PersonID",
                 table: "BE072024_HB_Phones",
                 column: "PersonID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BE072024_HB_Roles_PermissionId",
+                table: "BE072024_HB_Roles",
+                column: "PermissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BE072024_HB_RoomDetails_RoomID",
@@ -590,6 +635,9 @@ namespace BookingHotel.Core.Migrations
 
             migrationBuilder.DropTable(
                 name: "BE072024_HB_Rooms");
+
+            migrationBuilder.DropTable(
+                name: "BE072024_HB_Permission");
 
             migrationBuilder.DropTable(
                 name: "BE072024_HB_People");
