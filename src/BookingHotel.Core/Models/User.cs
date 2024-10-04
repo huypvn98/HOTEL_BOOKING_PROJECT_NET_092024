@@ -21,6 +21,7 @@ public class User
 
     public string? RefreshToken_ExpriredTime{get; set;}
 
+     public string? ImageUrl { get; set; }  
     public ICollection<UserRole> UserRoles { get; set; }
 }
 

@@ -42,13 +42,39 @@ public class AuthService
         // Tạo salt và hash mật khẩu
         var (hashedPassword, salt) = HashPassword(model.Password);
 
+        //Xử lý ảnh
+        string imageUrl = null;
+
+        if (model.Image != null)
+        {
+            // Đảm bảo thư mục Images tồn tại
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images");
+            if (!Directory.Exists(imageDirectory))
+            {
+                Directory.CreateDirectory(imageDirectory);
+            }
+
+            // Lưu ảnh vào wwwroot/Images
+            var fileName = $"{Guid.NewGuid()}_{DateTime.Now.AddHours(7):yyyyMMdd_HHmmss}_{Path.GetFileName(model.Image.FileName)}";
+            var filePath = Path.Combine(imageDirectory, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await model.Image.CopyToAsync(stream);
+            }
+
+            // Đường dẫn URL của ảnh
+            imageUrl = $"/Images/{fileName}";
+        }
+
         var user = new User
         {
             UserID = person.PersonID,
             Username = model.UserName,
             PasswordHash = hashedPassword,
             PasswordSalt = Convert.ToBase64String(salt),  // Lưu salt
-            CreateDate =  DateTime.UtcNow.AddHours(7),
+            CreateDate = DateTime.UtcNow.AddHours(7),
+            ImageUrl = imageUrl
         };
         await _unitOfWork.Repository<User>().AddAsync(user);
         await _unitOfWork.SaveChangesAsync();
@@ -59,13 +85,14 @@ public class AuthService
             UserID = user.UserID,
             RoleID = 3 // Gán role mặc định là User
         };
-        
+
         await _unitOfWork.Repository<UserRole>().AddAsync(userRole);
         await _unitOfWork.SaveChangesAsync();
 
-       // Gán vào Customer
+        // Gán vào Customer
 
-        var customer = new Customer {
+        var customer = new Customer
+        {
             CustomerID = user.UserID,
             RegistrationDate = user.CreateDate,
             CustomerSpecificInfo = string.Empty,
@@ -97,6 +124,14 @@ public class AuthService
         var person = await _unitOfWork.Repository<Person>().GetAsync(p => p.PersonID == user.UserID);
 
         var roles = await _unitOfWork.Repository<UserRole>().GetAllAsync(ur => ur.UserID == user.UserID);
+
+        var email = await _unitOfWork.Repository<Email>().GetAllAsync(p => p.PersonID == user.UserID);
+
+        // Nếu không tìm thấy email nào
+        if (email == null || !email.Any())
+        {
+            throw new Exception("No emails found for this user.");
+        }
 
         // Tạo claims cho JWT
         var claims = new List<Claim>
@@ -134,7 +169,9 @@ public class AuthService
             UserID = user.UserID,
             Username = user.Username,
             FirstName = person.FirstName,  // Lấy thông tin FirstName từ Person
-            LastName = person.LastName      // Lấy thông tin LastName từ Person
+            LastName = person.LastName,      // Lấy thông tin LastName từ Person
+            Email =  string.Join(", ", email.Select(e => e.EmailAddress)),
+            UrlImage = !string.IsNullOrEmpty(user.ImageUrl) ? user.ImageUrl : string.Empty,
         };
 
         // Trả về Access Token, Refresh Token và thông tin người dùng
@@ -232,22 +269,22 @@ public class AuthService
     }
 
     public async Task LogoutUserAsync(int userId)
-{
-    // Tìm user dựa trên userID
-    var user = await _unitOfWork.Repository<User>().GetAsync(u => u.UserID == userId);
-
-    if (user == null)
     {
-        throw new Exception("User not found.");
+        // Tìm user dựa trên userID
+        var user = await _unitOfWork.Repository<User>().GetAsync(u => u.UserID == userId);
+
+        if (user == null)
+        {
+            throw new Exception("User not found.");
+        }
+
+        // Xóa refresh token của người dùng trong DB
+        user.RefreshToken = null;
+        user.RefreshToken_ExpriredTime = null;
+
+        _unitOfWork.Repository<User>().UpdateAsync(user);
+        await _unitOfWork.SaveChangesAsync();
     }
-
-    // Xóa refresh token của người dùng trong DB
-    user.RefreshToken = null;
-    user.RefreshToken_ExpriredTime = null;
-
-    _unitOfWork.Repository<User>().UpdateAsync(user);
-    await _unitOfWork.SaveChangesAsync();
-}
 
 
 }

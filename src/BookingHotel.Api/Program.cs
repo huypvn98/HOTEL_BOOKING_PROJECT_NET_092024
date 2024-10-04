@@ -2,6 +2,7 @@ using BookingHotel.Api.Extensions;
 using BookingHotel.Core;
 using BookingHotel.Core.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,13 @@ var app = builder.Build();
 // 	app.UseSwagger();
 // 	app.UseSwaggerUI();
 // }
+// Cấu hình sử dụng các file tĩnh (ảnh, CSS, JavaScript)
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images")),
+    RequestPath = "/Images" // Đường dẫn này sẽ tương ứng với thư mục wwwroot/images
+});
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
