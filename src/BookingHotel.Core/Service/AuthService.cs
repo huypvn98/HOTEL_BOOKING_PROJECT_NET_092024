@@ -141,6 +141,51 @@ public class AuthService
         return (new JwtSecurityTokenHandler().WriteToken(accessToken), refreshToken, userInfo);
     }
 
+    public async Task<(string AccessToken, UserDto UserInfo)> GetUserByRefreshTokenAsync(string refreshToken)
+    {
+        var user = await _unitOfWork.Repository<User>().GetAsync(u => u.RefreshToken == refreshToken);
+
+        if (user == null || DateTime.Parse(user.RefreshToken_ExpriredTime) < DateTime.UtcNow.AddHours(7))
+        {
+            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+        }
+
+        var person = await _unitOfWork.Repository<Person>().GetAsync(p => p.PersonID == user.UserID);
+        var roles = await _unitOfWork.Repository<UserRole>().GetAllAsync(ur => ur.UserID == user.UserID);
+
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
+            new Claim(ClaimTypes.Name, user.Username)
+        };
+
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role.RoleID.ToString()));
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var accessToken = new JwtSecurityToken(
+            issuer: _configuration["Jwt:Issuer"],
+            audience: _configuration["Jwt:Audience"],
+            expires: DateTime.UtcNow.AddHours(7).AddMinutes(30),
+            signingCredentials: creds,
+            claims: claims
+        );
+
+        var userInfo = new UserDto
+        {
+            UserID = user.UserID,
+            Username = user.Username,
+            FirstName = person.FirstName,
+            LastName = person.LastName
+        };
+
+        return (new JwtSecurityTokenHandler().WriteToken(accessToken), userInfo);
+    }
+
     private (string hashedPassword, byte[] salt) HashPassword(string password)
     {
         byte[] salt = new byte[128 / 8];
@@ -185,5 +230,24 @@ public class AuthService
         // Chuyển mảng byte thành chuỗi base64 để dễ dàng lưu trữ
         return Convert.ToBase64String(randomNumber);
     }
+
+    public async Task LogoutUserAsync(int userId)
+{
+    // Tìm user dựa trên userID
+    var user = await _unitOfWork.Repository<User>().GetAsync(u => u.UserID == userId);
+
+    if (user == null)
+    {
+        throw new Exception("User not found.");
+    }
+
+    // Xóa refresh token của người dùng trong DB
+    user.RefreshToken = null;
+    user.RefreshToken_ExpriredTime = null;
+
+    _unitOfWork.Repository<User>().UpdateAsync(user);
+    await _unitOfWork.SaveChangesAsync();
+}
+
 
 }
