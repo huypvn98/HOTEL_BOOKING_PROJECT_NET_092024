@@ -22,6 +22,23 @@ public class AuthService
 
     public async Task<string> RegisterAsync(RegisterDto model)
     {
+
+        //check email đã tồn tại chưa
+
+        var existingEmail = await _unitOfWork.Repository<Email>().GetAsync(e => e.EmailAddress == model.Email);
+
+        if (existingEmail != null)
+        {
+            throw new Exception("Email already exists.");
+        }
+
+        // Kiểm tra username đã tồn tại hay chưa
+        var existingUser = await _unitOfWork.Repository<User>().GetAsync(u => u.Username == model.UserName);
+        if (existingUser != null)
+        {
+            throw new Exception("Username already exists.");
+        }
+
         var person = new Person
         {
             FirstName = model.FirstName,
@@ -170,7 +187,7 @@ public class AuthService
             Username = user.Username,
             FirstName = person.FirstName,  // Lấy thông tin FirstName từ Person
             LastName = person.LastName,      // Lấy thông tin LastName từ Person
-            Email =  string.Join(", ", email.Select(e => e.EmailAddress)),
+            Email = string.Join(", ", email.Select(e => e.EmailAddress)),
             UrlImage = !string.IsNullOrEmpty(user.ImageUrl) ? user.ImageUrl : string.Empty,
         };
 
