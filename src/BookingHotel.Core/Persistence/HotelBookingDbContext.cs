@@ -29,6 +29,7 @@ namespace BookingHotel.Core.Persistence
         public DbSet<BookingDetail> BookingDetails { get; set; }
         public DbSet<Deposit> Deposits { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<TypeBed> TypeBeds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -96,6 +97,9 @@ namespace BookingHotel.Core.Persistence
 
             modelBuilder.Entity<Invoice>()
                 .HasKey(i => i.InvoiceID);
+
+            modelBuilder.Entity<TypeBed>()
+                .HasKey(i => i.BedID);
 
             // Các cấu hình khóa ngoại
             modelBuilder.Entity<Address>()
