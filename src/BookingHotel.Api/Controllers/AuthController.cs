@@ -40,6 +40,17 @@ public class AuthController : ControllerBase
         try
         {
             var tokens = await _authService.LoginAsync(model);
+
+            // Store RefreshToken in a secure HttpOnly cookie
+            Response.Cookies.Append("RefreshToken", tokens.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Ensures the cookie is sent over HTTPS only
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7) // Same expiration as the token
+            });
+
+
             return Ok(new
             {
                 AccessToken = tokens.AccessToken,
@@ -53,4 +64,73 @@ public class AuthController : ControllerBase
         }
 
     }
+
+
+    /// <summary>
+    /// Gets user info and new access token by refresh token from cookies. API này login xong thì tự động gọi được
+    /// </summary>
+    [HttpGet("refresh-token")]
+    public async Task<IActionResult> GetUserByRefreshToken()
+    {
+        try
+        {
+            // Get refresh token from the cookie
+            var refreshToken = Request.Cookies["RefreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+                throw new UnauthorizedAccessException("Refresh token is missing.");
+
+            var tokens = await _authService.GetUserByRefreshTokenAsync(refreshToken);
+
+            // Return a new access token and user info
+            return Ok(new
+            {
+                AccessToken = tokens.AccessToken,
+                UserInfo = tokens.UserInfo
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPost("logout")]
+    [SwaggerOperation(Summary = "Logout the user", Description = "Logs out the user by invalidating the refresh token.")]
+    [SwaggerResponse(200, "Logout successful", typeof(object))]
+    [SwaggerResponse(400, "Logout failed", typeof(object))]
+    public async Task<IActionResult> Logout()
+    {
+        try
+        {
+            // Lấy refresh token từ cookie
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest(new { message = "No refresh token found in the cookies." });
+            }
+
+            // Lấy user dựa trên refresh token
+            var user = await _authService.GetUserByRefreshTokenAsync(refreshToken);
+
+            if (user.UserInfo == null)
+            {
+                return BadRequest(new { message = "Invalid refresh token." });
+            }
+
+            // Xóa refresh token của người dùng trong DB
+            await _authService.LogoutUserAsync(user.UserInfo.UserID);
+
+            // Xóa refresh token trong cookie
+            Response.Cookies.Delete("refreshToken");
+
+            return Ok(new { message = "Logout successful!" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
 }
