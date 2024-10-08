@@ -42,7 +42,7 @@ app.UseStaticFiles(new StaticFileOptions
         Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images")),
     RequestPath = "/Images" // Đường dẫn này sẽ tương ứng với thư mục wwwroot/images
 });
-
+app.UseCors("AllowAllOrigins");
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {

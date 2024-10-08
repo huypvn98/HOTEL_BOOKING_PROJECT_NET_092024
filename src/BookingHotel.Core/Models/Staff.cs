@@ -6,12 +6,12 @@ namespace BackendAPIBookingHotel.Model
 	public class Staff
 	{
 		[Key]
-		public int StaffID { get; set; }
-		public int Position { get; set; }
-		public string HireDate{get; set;}
-		public int HotelID { get; set; }
+		public int? StaffID { get; set; }
+		public int? Position { get; set; }
+		public string? HireDate{get; set;}
+		public int? HotelID { get; set; }
 
-		public Hotel Hotel { get; set; }
+		public Hotel? Hotel { get; set; }
 
 	}
 }

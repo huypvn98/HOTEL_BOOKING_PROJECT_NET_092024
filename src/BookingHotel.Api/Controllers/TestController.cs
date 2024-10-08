@@ -12,6 +12,14 @@ namespace BookingHotel.Api.Controllers
     [Route("api/[controller]")]
     public class TestAuthorizeController : ControllerBase
     {
+        // Public API, không cần xác thực
+        [HttpGet("public")]
+
+        public IActionResult PublicEndpoint()
+        {
+            return Ok("This endpoint is publicly accessible.");
+        }
+
         [HttpGet("admin")]
         [RoleAuthorize("1")] // Chỉ cho phép người dùng có RoleID là 1
         public IActionResult GetAdminData()
@@ -25,6 +33,14 @@ namespace BookingHotel.Api.Controllers
         public IActionResult GetUserData()
         {
             return Ok(new { message = "This is user data." });
+        }
+
+
+        [HttpGet("staff")]
+        [RoleAuthorize("4")] // Chỉ cho phép người dùng có RoleID là 3
+        public IActionResult GetStaffData()
+        {
+            return Ok(new { message = "This is staff data." });
         }
     }
 
