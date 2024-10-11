@@ -1,4 +1,5 @@
 ﻿using BookingHotel.Core.Persistence;
+using BookingHotel.Core.Services;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -82,6 +83,8 @@ namespace BookingHotel.Core
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<AuthService>();
+            services.AddScoped<IRoomService, RoomService>();
+
             return services;
         }
     }
