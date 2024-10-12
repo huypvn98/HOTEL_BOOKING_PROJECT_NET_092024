@@ -10,9 +10,15 @@
 
 		public DateTime CreatedDate { get; set; }
 
-
 		public ICollection<Room> Rooms { get; set; }
 
 		public ICollection<Staff> Staffs { get; set; }
 	}
+
+    public class Hotel_InsertRequestData
+    {
+        public string? HotelName { get; set; }
+        public string? Description { get; set; }
+        public int IsActive { get; set; }
+    }
 }
