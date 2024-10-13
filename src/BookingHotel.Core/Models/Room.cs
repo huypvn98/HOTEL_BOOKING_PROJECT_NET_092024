@@ -15,8 +15,12 @@ namespace BackendAPIBookingHotel.Model
 		public ICollection<Booking> Bookings { get; set; }
 		public virtual ICollection<BedRoom> BedRooms { get; set; }
         public virtual ICollection<ImageRooms> ImageRooms { get; set; }
-		public virtual RoomDetail RoomDetail { get; set; }	
-	}
+
+		//them khoa ngoai
+		public virtual RoomDetail RoomDetail { get; set; }
+
+
+    }
 
 
 }
