@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookingHotel.Core.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    [Migration("20240927044000_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20241015081728_updateRelationship")]
+    partial class updateRelationship
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -444,6 +444,9 @@ namespace BookingHotel.Core.Migrations
                     b.Property<int>("IsActive")
                         .HasColumnType("int");
 
+                    b.Property<int>("RoomDetailID")
+                        .HasColumnType("int");
+
                     b.Property<string>("RoomNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -454,6 +457,8 @@ namespace BookingHotel.Core.Migrations
                     b.HasKey("RoomID");
 
                     b.HasIndex("HotelID");
+
+                    b.HasIndex("RoomDetailID");
 
                     b.ToTable("BE072024_HB_Rooms");
                 });
@@ -476,9 +481,6 @@ namespace BookingHotel.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoomID")
-                        .HasColumnType("int");
-
                     b.Property<string>("RoomType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -488,9 +490,6 @@ namespace BookingHotel.Core.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoomDetailID");
-
-                    b.HasIndex("RoomID")
-                        .IsUnique();
 
                     b.ToTable("BE072024_HB_RoomDetails");
                 });
@@ -737,18 +736,15 @@ namespace BookingHotel.Core.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Hotel");
-                });
-
-            modelBuilder.Entity("BackendAPIBookingHotel.Model.RoomDetail", b =>
-                {
-                    b.HasOne("BackendAPIBookingHotel.Model.Room", "Room")
-                        .WithOne("RoomDetail")
-                        .HasForeignKey("BackendAPIBookingHotel.Model.RoomDetail", "RoomID")
+                    b.HasOne("BackendAPIBookingHotel.Model.RoomDetail", "RoomDetail")
+                        .WithMany()
+                        .HasForeignKey("RoomDetailID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Room");
+                    b.Navigation("Hotel");
+
+                    b.Navigation("RoomDetail");
                 });
 
             modelBuilder.Entity("BackendAPIBookingHotel.Model.Staff", b =>
@@ -828,9 +824,6 @@ namespace BookingHotel.Core.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("ImageRooms");
-
-                    b.Navigation("RoomDetail")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("BackendAPIBookingHotel.Model.Service", b =>
