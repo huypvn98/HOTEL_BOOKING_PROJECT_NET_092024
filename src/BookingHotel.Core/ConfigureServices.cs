@@ -84,6 +84,7 @@ namespace BookingHotel.Core
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<AuthService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IRoomDetailService, RoomDetailService>();
 
             return services;
         }

@@ -46,18 +46,32 @@ namespace BookingHotel.Core.Services
 
             var roomDetail = new RoomDetail()
             {
-                
+                RoomFittings = roomDetailDTO.RoomFittings,
+                RoomView=roomDetailDTO.RoomView,
+                RoomType=roomDetailDTO.RoomType,
+                PricePerNight=roomDetailDTO.PricePerNight,
+                IsAvailable=roomDetailDTO.IsAvailable
             };
-            await _unitOfWork.Repository<Room>().AddAsync(room);
+            await _unitOfWork.Repository<RoomDetail>().AddAsync(roomDetail);
             await _unitOfWork.SaveChangesAsync();
             reponse.returnCode = 200;
-            reponse.returnMessage = "Thêm Phòng khách sạn thành công";
+            reponse.returnMessage = "Thêm chi tiết phòng khách sạn thành công";
             return reponse;
         }
 
-        public Task<RetureReponse> UpdateRoomDetail(int idRoomDetail, RoomDetailDTO roomDetailDTO)
+        public async Task<RetureReponse> UpdateRoomDetail(int idRoomDetail, RoomDetailDTO roomDetailDTO)
         {
-            throw new NotImplementedException();
+            var reponse = new RetureReponse();
+            var roomDetail = await _unitOfWork.Repository<RoomDetail>().GetByIdAsync(idRoomDetail);
+            roomDetail.RoomFittings = roomDetailDTO.RoomFittings;
+            roomDetail.RoomView = roomDetailDTO.RoomView;
+            roomDetail.RoomType = roomDetailDTO.RoomType;
+            roomDetail.PricePerNight = roomDetailDTO.PricePerNight;
+            roomDetail.IsAvailable = roomDetailDTO.IsAvailable;
+            await _unitOfWork.SaveChangesAsync();
+            reponse.returnCode = 200;
+            reponse.returnMessage = "Cập nhật chi tiết phòng khách sạn thành công";
+            return reponse;
         }
     }
 }

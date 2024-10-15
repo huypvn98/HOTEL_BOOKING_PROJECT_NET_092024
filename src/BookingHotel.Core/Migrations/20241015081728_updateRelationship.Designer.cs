@@ -4,6 +4,7 @@ using BookingHotel.Core.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,12 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookingHotel.Core.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    partial class HotelBookingDbContextModelSnapshot : ModelSnapshot
+   
+    [Migration("20241015081728_updateRelationship")]
+    partial class updateRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,19 +65,21 @@ namespace BookingHotel.Core.Migrations
 
             modelBuilder.Entity("BackendAPIBookingHotel.Model.Admin", b =>
                 {
-                    b.Property<int?>("AdminID")
+                    b.Property<int>("AdminID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("AdminID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AdminID"));
 
                     b.Property<string>("AdminSpecificInfo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("AssignedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Position")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AdminID");
@@ -202,6 +208,7 @@ namespace BookingHotel.Core.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("CustomerSpecificInfo")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("RegistrationDate")
@@ -580,9 +587,6 @@ namespace BookingHotel.Core.Migrations
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()

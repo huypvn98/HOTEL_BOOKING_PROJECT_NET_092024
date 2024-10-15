@@ -9,11 +9,11 @@ namespace BookingHotel.Core.DTO
 {
     public class RoomDetailDTO
     {
-           public int RoomId       {get;set;}
            public string RoomFittings {get;set;}
            public string RoomView     {get;set;}
            public string RoomType     {get;set;}
-           public double PricePerNight{get;set;}
-           public bool IsAvailable { get; set; } = true;
+           public int PricePerNight{get;set;}
+           public int IsAvailable { get; set; } = 1;
+        
     }
 }
