@@ -88,6 +88,7 @@ namespace BookingHotel.Core
             services.AddScoped<IHotelGenericRepository, HotelGenericRepository>();
             services.AddScoped<HotelService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IUserService, UserService>();
             return services;
         }
     }

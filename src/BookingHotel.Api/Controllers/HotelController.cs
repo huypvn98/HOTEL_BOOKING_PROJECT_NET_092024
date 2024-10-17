@@ -125,7 +125,7 @@ namespace BookingHotel.Api.Controllers
                 return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
             }
         }
-        [HttpPut("unisactive/{id}")]
+        [HttpPut("sactive/{id}")]
         public async Task<IActionResult> UnIsActiveHotel(int id)
         {
             var result = await _hotelService.UnIsActiveHotelAsync(id);
