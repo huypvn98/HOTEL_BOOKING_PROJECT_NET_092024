@@ -4,6 +4,7 @@ using BookingHotel.Core.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookingHotel.Core.Migrations
 {
     [DbContext(typeof(HotelBookingDbContext))]
-    partial class HotelBookingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241017062351_UpdateHotelTableCreatedUpdate")]
+    partial class UpdateHotelTableCreatedUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -297,9 +300,6 @@ namespace BookingHotel.Core.Migrations
 
                     b.Property<string>("UrlImage")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool?>("isActive")
-                        .HasColumnType("bit");
 
                     b.HasKey("HotelID");
 
