@@ -90,7 +90,7 @@ namespace BookingHotel.Api.Controllers
         }
         // POST api/<RoomController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] RoomDTO roomRequest)
+        public async Task<IActionResult> Post([FromForm] RoomDTO roomRequest)
         {
 
             var returnRespone = new RetureReponse();

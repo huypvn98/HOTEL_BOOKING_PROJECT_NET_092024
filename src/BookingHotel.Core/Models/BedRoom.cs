@@ -10,7 +10,7 @@ namespace BackendAPIBookingHotel.Model
 
         [Key, Column(Order = 1)]
         public int BedID { get; set; }
-
+         
         public int Quantity { get; set; }
     }
 }

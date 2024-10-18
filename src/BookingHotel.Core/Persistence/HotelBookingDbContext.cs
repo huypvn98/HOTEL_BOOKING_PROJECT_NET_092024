@@ -1,4 +1,5 @@
 ﻿using BackendAPIBookingHotel.Model;
+using BookingHotel.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookingHotel.Core.Persistence
@@ -29,6 +30,7 @@ namespace BookingHotel.Core.Persistence
         public DbSet<BookingDetail> BookingDetails { get; set; }
         public DbSet<Deposit> Deposits { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<Bed> Beds { get; set; }
 
 
 
@@ -127,6 +129,8 @@ namespace BookingHotel.Core.Persistence
 
             modelBuilder.Entity<Invoice>()
                 .HasKey(i => i.InvoiceID);
+            modelBuilder.Entity<Bed>()
+              .HasKey(i => i.BedID);
 
             // Các cấu hình khóa ngoại
             modelBuilder.Entity<Address>()

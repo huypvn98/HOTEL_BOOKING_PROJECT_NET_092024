@@ -47,10 +47,16 @@ namespace BookingHotel.Core.Services
               HotelID = roomDTO.hotelID,
               RoomNumber = roomDTO.roomNumber,
               RoomSquare = roomDTO.roomSquare,
-              IsActive = roomDTO.isActive
+              IsActive = roomDTO.isActive,
+              RoomDetailID=roomDTO.iddetail
           };
           await _unitOfWork.Repository<Room>().AddAsync(room);
           await _unitOfWork.SaveChangesAsync();
+            foreach(var image in roomDTO.Images)
+            {
+
+            }
+
           reponse.returnCode = 200;
           reponse.returnMessage = "Thêm Phòng khách sạn thành công";
          return reponse;
