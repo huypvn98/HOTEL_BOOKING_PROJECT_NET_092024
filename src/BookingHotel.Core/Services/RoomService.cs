@@ -52,8 +52,23 @@ namespace BookingHotel.Core.Services
           };
           await _unitOfWork.Repository<Room>().AddAsync(room);
           await _unitOfWork.SaveChangesAsync();
-            foreach(var image in roomDTO.Images)
+
+            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
+
+            //check folder image exci
+
+
+            foreach (var image in roomDTO.Images)
             {
+                if (image.Length > 0)
+                {
+                    var filePath = Path.Combine("Uploads", image.FileName);
+
+                    using (var stream = System.IO.File.Create(filePath))
+                    {
+                        await image.CopyToAsync(stream);
+                    }
+                }
 
             }
 
