@@ -9,6 +9,7 @@ namespace BackendAPIBookingHotel.Model
         public int Id { get; set; }
 
         public string NameFileImg { get; set; }
+        public int RoomID { get; set; }
 
         [ForeignKey("RoomID")]
         public virtual Room Room { get; set; }

@@ -15,6 +15,7 @@ namespace BookingHotel.Core.Repository.Interface
 
         Task<IEnumerable<T>> GetAllAsync();
         Task AddAsync(T entity);
+        Task AddListAsync(List<T> entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(int id);
     }

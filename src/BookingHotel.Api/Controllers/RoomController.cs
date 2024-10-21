@@ -2,6 +2,7 @@
 using BackendAPIBookingHotel.Model;
 using BookingHotel.Core;
 using BookingHotel.Core.DTO;
+using BookingHotel.Core.Models;
 using BookingHotel.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -102,6 +103,22 @@ namespace BookingHotel.Api.Controllers
                 {
                     returnRespone.returnCode = 404;
                     returnRespone.returnMessage = "Khách sạn không tìm thấy";
+                    return NotFound(returnRespone);
+                }
+             
+                if (roomRequest.Images.Count == 0)
+                {
+                    returnRespone.returnCode = 400;
+                    returnRespone.returnMessage = "Vui lòng chọn ảnh";
+                    return BadRequest(returnRespone);
+
+                }
+
+                var bed = _unitOfWork.Repository<Bed>().GetByIdAsync(roomRequest.idBed).Result;
+                if (bed == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Loại giường không tìm th";
                     return NotFound(returnRespone);
                 }
                 returnRespone = _roomService.InsertRoom(roomRequest).Result;

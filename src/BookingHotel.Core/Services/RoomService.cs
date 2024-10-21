@@ -48,29 +48,46 @@ namespace BookingHotel.Core.Services
               RoomNumber = roomDTO.roomNumber,
               RoomSquare = roomDTO.roomSquare,
               IsActive = roomDTO.isActive,
-              RoomDetailID=roomDTO.iddetail
+              RoomDetailID=roomDTO.iddetail,
+              
           };
           await _unitOfWork.Repository<Room>().AddAsync(room);
           await _unitOfWork.SaveChangesAsync();
+            // add bed
+            var bedRoom= new BedRoom();
 
+        bedRoom.RoomID=room.RoomID;
+            bedRoom.BedID=roomDTO.idBed;
+            bedRoom.Quantity=roomDTO.quantity;
+            await _unitOfWork.Repository<BedRoom>().AddAsync(bedRoom);
+            await _unitOfWork.SaveChangesAsync();
+
+
+            //add image
             var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
 
             //check folder image exci
-
+            var imgRooms = new List<ImageRooms>();
 
             foreach (var image in roomDTO.Images)
             {
                 if (image.Length > 0)
                 {
-                    var filePath = Path.Combine("Uploads", image.FileName);
-
+                    var fileName = Guid.NewGuid() + "_" + image.FileName;
+                    var filePath = Path.Combine("Uploads", fileName);
+                  
                     using (var stream = System.IO.File.Create(filePath))
                     {
                         await image.CopyToAsync(stream);
                     }
+                    var imgRoom = new ImageRooms();
+                    imgRoom.NameFileImg = fileName;
+                    imgRoom.RoomID = room.RoomID;
+                    imgRooms.Add(imgRoom);
                 }
 
             }
+            await _unitOfWork.Repository<ImageRooms>().AddListAsync(imgRooms);
 
           reponse.returnCode = 200;
           reponse.returnMessage = "Thêm Phòng khách sạn thành công";
