@@ -18,7 +18,7 @@ namespace BookingHotel.Core.DTO
    
        public int idBed {get;set;}   
        public int quantity { get; set; }
-        public List<IFormFile> Images { get; set; }
+        public List<IFormFile>? Images { get; set; }
         //ListImage
 
     }

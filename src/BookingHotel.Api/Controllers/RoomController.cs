@@ -165,13 +165,13 @@ namespace BookingHotel.Api.Controllers
                     returnRespone.returnMessage = "Chi tiết phòng không tìm thấy";
                     return NotFound(returnRespone);
                 }
-                if (roomRequest.Images.Count == 0)
-                {
-                    returnRespone.returnCode = 400;
-                    returnRespone.returnMessage = "Vui lòng chọn ảnh";
-                    return BadRequest(returnRespone);
+                //if (roomRequest.Images==null)
+                //{
+                //    returnRespone.returnCode = 400;
+                //    returnRespone.returnMessage = "Vui lòng chọn ảnh";
+                //    return BadRequest(returnRespone);
 
-                }
+                //}
 
                 var bed = _unitOfWork.Repository<Bed>().GetByIdAsync(roomRequest.idBed).Result;
                 if (bed == null)
