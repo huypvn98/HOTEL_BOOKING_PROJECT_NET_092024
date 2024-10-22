@@ -124,7 +124,7 @@ namespace BookingHotel.Api.Controllers
                 if (bed == null)
                 {
                     returnRespone.returnCode = 404;
-                    returnRespone.returnMessage = "Loại giường không tìm th";
+                    returnRespone.returnMessage = "Loại giường không tìm thấy";
                     return NotFound(returnRespone);
                 }
                 returnRespone = _roomService.InsertRoom(roomRequest).Result;
@@ -156,7 +156,29 @@ namespace BookingHotel.Api.Controllers
                 {
                     returnRespone.returnCode = 404;
                     returnRespone.returnMessage = "Khách sạn không tìm thấy";
+                    return NotFound(returnRespone);
+                }
+                var detailHotel = _unitOfWork.Repository<RoomDetail>().GetByIdAsync(roomRequest.iddetail).Result;
+                if (detailHotel == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Chi tiết phòng không tìm thấy";
+                    return NotFound(returnRespone);
+                }
+                if (roomRequest.Images.Count == 0)
+                {
+                    returnRespone.returnCode = 400;
+                    returnRespone.returnMessage = "Vui lòng chọn ảnh";
                     return BadRequest(returnRespone);
+
+                }
+
+                var bed = _unitOfWork.Repository<Bed>().GetByIdAsync(roomRequest.idBed).Result;
+                if (bed == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Loại giường không tìm thấy";
+                    return NotFound(returnRespone);
                 }
                 returnRespone = _roomService.UpdateRoom(id,roomRequest).Result;
                 return Ok(returnRespone);
