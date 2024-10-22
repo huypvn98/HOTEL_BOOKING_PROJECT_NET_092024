@@ -22,4 +22,10 @@ namespace BookingHotel.Core.DTO
         //ListImage
 
     }
+    public class RoomDTOResponse:RoomDTO
+    {
+        public List<string>? Images { get; set; }
+        //ListImage
+
+    }
 }

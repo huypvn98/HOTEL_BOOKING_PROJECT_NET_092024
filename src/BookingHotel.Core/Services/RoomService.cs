@@ -18,7 +18,10 @@ namespace BookingHotel.Core.Services
         public async Task<RetureReponse> DeleteRoom(int idRoom)
         {
             var reponse = new RetureReponse();
-             await _unitOfWork.Repository<Room>().DeleteAsync(idRoom);
+            //remove bed in room
+            // remove image
+            await _unitOfWork.Repository<Room>().DeleteAsync(idRoom);
+
             await _unitOfWork.SaveChangesAsync();
             reponse.returnCode = 200;
             reponse.returnMessage = "Xóa Phòng khách sạn thành công";

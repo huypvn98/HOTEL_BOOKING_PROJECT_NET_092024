@@ -39,12 +39,23 @@ namespace BookingHotel.Api.Controllers
                     reponse.returnMessage = "Không tìm thấy phòng";
                     return NotFound(reponse);
                 }
-                var RoomDTO = new RoomDTO()
+                var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x => x.RoomID == room.RoomID).FirstOrDefault();
+                var listImgInDb = _unitOfWork.Repository<ImageRooms>().GetAllAsync().Result.Where(x => x.RoomID == room.RoomID).ToList();
+
+                //var listImage= listImgInDb.Select(x=>new List<string>
+                //{
+
+                //})
+                var RoomDTO = new RoomDTOResponse()
                 {
                     hotelID = room.HotelID,
                     roomNumber = room.RoomNumber,
                     roomSquare = room.RoomSquare,
                     isActive = room.IsActive,
+                    idBed=bed.BedID,
+                    iddetail=room.RoomDetailID,
+                    quantity=bed.Quantity,
+                    Images= listImgInDb.Select(x => x.NameFileImg).ToList()
                 };
                 return Ok(RoomDTO);
             
@@ -67,14 +78,22 @@ namespace BookingHotel.Api.Controllers
                 
                if (room.Count>0)
                 {
-                    var roomDTO = room.Select(x => new RoomDTO()
-                    {
-                        hotelID = x.HotelID,
-                        roomNumber = x.RoomNumber,
-                        roomSquare = x.RoomSquare,
-                        isActive = x.IsActive
-                    }) ;
-                    return Ok(roomDTO);
+                    var listRoom = new List<RoomDTO>();
+                    //foreach(var itemRoom in room)
+                    //{
+                    //    var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x=>x.RoomID==itemRoom.RoomID).ToList();
+                    //    var roomDTO = new RoomDTO();
+                    //    roomDTO.ro
+                    //}
+                    //var roomDTO = room.Select(x => new RoomDTO()
+                    //{
+                    //    hotelID = x.HotelID,
+                    //    roomNumber = x.RoomNumber,
+                    //    roomSquare = x.RoomSquare,
+                    //    isActive = x.IsActive,
+                       
+                    //});
+                    return Ok(room);
                 }
                 reponse.returnCode = 404;
                 reponse.returnMessage = "Không dữ liệu nào được tìm thấy";
