@@ -64,8 +64,11 @@ namespace BookingHotel.Core.Services
 
 
             //add image
-            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Images");
-
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images");
+            if (!Directory.Exists(imageDirectory))
+            {
+                Directory.CreateDirectory(imageDirectory);
+            }
             //check folder image exci
             var imgRooms = new List<ImageRooms>();
 
@@ -74,8 +77,8 @@ namespace BookingHotel.Core.Services
                 if (image.Length > 0)
                 {
                     var fileName = Guid.NewGuid() + "_" + image.FileName;
-                    var filePath = Path.Combine("Uploads", fileName);
-                  
+                   
+                    var filePath = Path.Combine(imageDirectory,fileName);
                     using (var stream = System.IO.File.Create(filePath))
                     {
                         await image.CopyToAsync(stream);
@@ -88,7 +91,7 @@ namespace BookingHotel.Core.Services
 
             }
             await _unitOfWork.Repository<ImageRooms>().AddListAsync(imgRooms);
-
+            await _unitOfWork.SaveChangesAsync();
           reponse.returnCode = 200;
           reponse.returnMessage = "Thêm Phòng khách sạn thành công";
          return reponse;

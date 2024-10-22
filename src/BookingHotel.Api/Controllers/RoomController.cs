@@ -105,7 +105,13 @@ namespace BookingHotel.Api.Controllers
                     returnRespone.returnMessage = "Khách sạn không tìm thấy";
                     return NotFound(returnRespone);
                 }
-             
+                var detailHotel = _unitOfWork.Repository<RoomDetail>().GetByIdAsync(roomRequest.iddetail).Result;
+                if (detailHotel == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Chi tiết phòng không tìm thấy";
+                    return NotFound(returnRespone);
+                }
                 if (roomRequest.Images.Count == 0)
                 {
                     returnRespone.returnCode = 400;
@@ -132,7 +138,7 @@ namespace BookingHotel.Api.Controllers
 
         // POST api/<RoomController>
         [HttpPut("Edit")]
-        public async Task<IActionResult> Edit(int id,[FromBody] RoomDTO roomRequest )
+        public async Task<IActionResult> Edit(int id,[FromForm] RoomDTO roomRequest )
         {
             var returnRespone = new RetureReponse();
 
