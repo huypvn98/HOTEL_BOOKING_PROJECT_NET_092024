@@ -2,6 +2,10 @@
 using BookingHotel.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
+/*
+    dotnet ef migrations add UpdateUserTableTT --startup-project ../BookingHotel.Api
+    dotnet ef database update --startup-project ../BookingHotel.Api
+*/
 namespace BookingHotel.Core.Persistence
 {
     public class HotelBookingDbContext : DbContext

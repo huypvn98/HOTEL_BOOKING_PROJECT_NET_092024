@@ -1,5 +1,6 @@
 
 using BookingHotel.Core.Repository.Interface;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BookingHotel.Core
 {
@@ -7,5 +8,7 @@ namespace BookingHotel.Core
     {
         IGenericRepository<T> Repository<T>() where T : class;
         Task<int> SaveChangesAsync();
+
+          Task<IDbContextTransaction> BeginTransactionAsync();
     }
 }

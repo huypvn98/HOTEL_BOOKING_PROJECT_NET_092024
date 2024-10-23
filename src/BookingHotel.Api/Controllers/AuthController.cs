@@ -34,6 +34,24 @@ public class AuthController : ControllerBase
         }
     }
 
+     /// <summary>
+    /// Tạo admin để test api
+    /// </summary>
+    [HttpPost("register-for-admin")]
+    public async Task<IActionResult> RegisterAdmin(RegisterDto model)
+    {
+        try
+        {
+            var message = await _authService.RegisterAdminAsync(model);
+            return Ok(new { message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginDto model)
     {

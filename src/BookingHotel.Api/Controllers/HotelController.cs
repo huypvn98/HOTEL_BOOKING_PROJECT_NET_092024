@@ -1,149 +1,142 @@
 ﻿using BackendAPIBookingHotel.Model;
-using BookingHotel.Core;
-using BookingHotel.Core.Repository.Interface;
+using BookingHotel.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace BookingHotel.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class HotelController : ControllerBase
+    {
+        private readonly HotelService _hotelService;
+        private readonly ILogger<HotelController> _logger;
+
+        public HotelController(HotelService hotelService, ILogger<HotelController> logger)
         {
-            //private IRoomRepository _roomServices;
-            private IHotelGenericRepository _hotelGenericRepository;
-            private IUnitOfWork _unitOfWork;
-            private readonly ILogger<HotelController> _logger;
-            public HotelController(
-                ILogger<HotelController> logger,
-                IHotelGenericRepository hotelGenericRepository,
-                IUnitOfWork unitOfWork)
+            _hotelService = hotelService;
+            _logger = logger;
+        }
+
+        [HttpGet("GetAll")]
+        public async Task<ActionResult<IEnumerable<Hotel>>> GetAllHotels([FromQuery] string keyword = "")
+        {
+            try
             {
-                _logger = logger;
-                _hotelGenericRepository = hotelGenericRepository;
-                _unitOfWork = unitOfWork;
+                var hotels = await _hotelService.GetAllHotelsAsync(keyword);
+                return Ok(hotels);
             }
-
-            [HttpGet("GetAll")]
-            public async Task<ActionResult<IEnumerable<Hotel>>> GetAllHotels([FromQuery] string keyword = "")
+            catch (Exception ex)
             {
-                try
-                {
-                    var hotels = await _hotelGenericRepository.GetAllAsync();
-
-                    if (!string.IsNullOrWhiteSpace(keyword))
-                    {
-                        hotels = hotels.Where(h => h.HotelName.Contains(keyword, StringComparison.OrdinalIgnoreCase) || h.Description.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-                                            .ToList();
-                    }
-
-                    return Ok(hotels);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error in GetAllHotels");
-                    return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
-                }
-            }
-
-            [HttpPost("Insert")]
-            public async Task<ActionResult<int>> InsertHotel(Hotel_InsertRequestData requestData)
-            {
-                try
-                {
-                    // Kiểm tra ràng buộc HotelName không được trống
-                    if (string.IsNullOrWhiteSpace(requestData.HotelName))
-                    {
-                        return BadRequest("HotelName cannot be empty.");
-                    }
-
-                    // Kiểm tra ràng buộc HotelName không được trùng
-                    var existingHotel = await _hotelGenericRepository.GetAsync(h => h.HotelName.Equals(requestData.HotelName, StringComparison.OrdinalIgnoreCase));
-                    if (existingHotel != null)
-                    {
-                        return BadRequest("HotelName already exists.");
-                    }
-
-                    var newHotel = new Hotel
-                    {
-                        CreatedDate = DateTime.UtcNow,
-                        HotelName = requestData.HotelName,
-                        Description = requestData.Description,
-                    };
-
-                    await _unitOfWork.Repository<Hotel>().AddAsync(newHotel);
-
-                    var rs = await _unitOfWork.SaveChangesAsync(); // Sửa đổi phương thức gọi
-
-                    return Ok(rs);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error in InsertHotel");
-                    return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
-                }
-            }
-
-            [HttpPut("Update/{id}")]
-            public async Task<ActionResult> UpdateHotel(int id, Hotel_InsertRequestData requestData)
-            {
-                try
-                {
-                    // Kiểm tra ràng buộc HotelName không được trống
-                    if (string.IsNullOrWhiteSpace(requestData.HotelName))
-                    {
-                        return BadRequest("HotelName cannot be empty.");
-                    }
-
-                    var existingHotel = await _hotelGenericRepository.GetByIdAsync(id); // Sửa đổi phương thức gọi
-                    if (existingHotel == null)
-                    {
-                        return NotFound($"Hotel with ID {id} not found.");
-                    }
-
-                    // Kiểm tra ràng buộc HotelName không được trùng
-                    var duplicateHotel = await _hotelGenericRepository.GetAsync(h => h.HotelName.Equals(requestData.HotelName, StringComparison.OrdinalIgnoreCase) && h.HotelID != id);
-                    if (duplicateHotel != null)
-                    {
-                        return BadRequest("HotelName already exists.");
-                    }
-
-                    existingHotel.HotelName = requestData.HotelName;
-                    existingHotel.Description = requestData.Description;
-                    // Update other properties as needed
-
-                    await _unitOfWork.Repository<Hotel>().UpdateAsync(existingHotel); // Sửa đổi phương thức gọi
-                    var affectedRows = await _unitOfWork.SaveChangesAsync(); // Sửa đổi phương thức gọi
-
-                    return Ok(affectedRows);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error in UpdateHotel for ID {id}");
-                    return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
-                }
-            }
-
-            [HttpDelete("Delete/{id}")]
-            public async Task<ActionResult> DeleteHotel(int id)
-            {
-                try
-                {
-                    var existingHotel = await _hotelGenericRepository.GetByIdAsync(id); // Sửa đổi phương thức gọi
-                    if (existingHotel == null)
-                    {
-                        return NotFound($"Hotel with ID {id} not found.");
-                    }
-
-                    await _unitOfWork.Repository<Hotel>().DeleteAsync(id); // Sửa đổi phương thức gọi
-                    var affectedRows = _unitOfWork.SaveChangesAsync();
-
-                    return Ok(affectedRows);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error in DeleteHotel for ID {id}");
-                    return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
-                }
+                _logger.LogError(ex, "Error in GetAllHotels");
+                return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
             }
         }
+
+        [HttpGet("GetById/{id}")]
+        public async Task<IActionResult> GetHotelById(int id)
+        {
+            var result = await _hotelService.GetHotelByIdAsync(id);
+
+            if (result.StatusCode == 404)
+                return NotFound(result.Message);
+
+            return Ok(result.Data);
+        }
+
+        [HttpPost("Create")]
+        public async Task<IActionResult> InsertHotel(Hotel_InsertRequestData requestData)
+        {
+            try
+            {
+                var result = await _hotelService.InsertHotelAsync(requestData);
+
+                // Kiểm tra xem mã trả về từ service là gì, nếu mã là 400 thì trả về BadRequest
+                if (result.StatusCode == 400)
+                {
+                    return BadRequest(new { message = result.Message });
+                }
+
+                // Trả về mã 201 khi khách sạn được thêm thành công
+                return StatusCode(201, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in InsertHotel");
+                return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
+            }
+        }
+
+        [HttpPut("Update/{id}")]
+        public async Task<IActionResult> UpdateHotel(int id, Hotel_InsertRequestData requestData)
+        {
+            try
+            {
+                var result = await _hotelService.UpdateHotelAsync(id, requestData);
+
+                // Kiểm tra mã trạng thái trả về từ service
+                if (result.StatusCode == 400)
+                {
+                    return BadRequest(new { message = result.Message });
+                }
+                else if (result.StatusCode == 404)
+                {
+                    return NotFound(new { message = result.Message });
+                }
+
+                // Trả về dữ liệu khách sạn sau khi cập nhật
+                return StatusCode(200, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in UpdateHotel for ID {id}");
+                return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
+            }
+        }
+
+
+        [HttpDelete("Delete/{id}")]
+        public async Task<ActionResult> DeleteHotel(int id)
+        {
+            try
+            {
+                await _hotelService.DeleteHotelAsync(id);
+                return Ok("Hotel is deleted successfully");
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in DeleteHotel for ID {id}");
+                return StatusCode(500, new { error = "An error occurred while processing your request.", details = ex.Message });
+            }
+        }
+        [HttpPut("sactive/{id}")]
+        public async Task<IActionResult> UnIsActiveHotel(int id)
+        {
+            var result = await _hotelService.UnIsActiveHotelAsync(id);
+
+            if (result.StatusCode == 404)
+                return NotFound(result.Message);
+
+            if (result.StatusCode == 400)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
     }
+}
