@@ -1,5 +1,6 @@
 ﻿using BackendAPIBookingHotel.Model;
 using BookingHotel.Core.DTO;
+using BookingHotel.Core.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,16 +11,35 @@ namespace BookingHotel.Core.Services
 {
     public class RoomService : IRoomService
     {
+        private readonly HotelBookingDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
-        public RoomService(IUnitOfWork unitOfWork)
+        public RoomService(IUnitOfWork unitOfWork, HotelBookingDbContext context)
         {
             _unitOfWork = unitOfWork;
+            _context = context;
         }
         public async Task<RetureReponse> DeleteRoom(int idRoom)
         {
             var reponse = new RetureReponse();
             //remove bed in room
+            var bedroom= _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x=>x.RoomID== idRoom).FirstOrDefault();
+            _context.BedRooms.Remove(bedroom);
             // remove image
+
+            var imgRooms = _unitOfWork.Repository<ImageRooms>().GetAllAsync().Result.Where(x => x.RoomID == idRoom).ToList();
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images");
+            foreach (var imgRoom in imgRooms)
+            {
+                var oldImagePath = Path.Combine(imageDirectory, imgRoom.NameFileImg);
+                await _unitOfWork.Repository<ImageRooms>().DeleteAsync(imgRoom.RoomID);
+                // Nếu ảnh cũ tồn tại, xóa ảnh cũ
+                if (System.IO.File.Exists(oldImagePath))
+                {
+                    System.IO.File.Delete(oldImagePath);
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.Repository<Room>().DeleteAsync(idRoom);
 
             await _unitOfWork.SaveChangesAsync();
@@ -141,7 +161,7 @@ namespace BookingHotel.Core.Services
                     {
                         System.IO.File.Delete(oldImagePath);
                     }
-                    _unitOfWork.Repository<ImageRooms>().DeleteAsync(img.Id);
+                  await  _unitOfWork.Repository<ImageRooms>().DeleteAsync(img.Id);
                 }
                 await _unitOfWork.SaveChangesAsync();
 

@@ -31,6 +31,9 @@ namespace BookingHotel.Core.Persistence
         public DbSet<Deposit> Deposits { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<Bed> Beds { get; set; }
+        public DbSet<BedRoom> BedRooms { get; set; }
+        public DbSet<ImageRooms> ImageRooms { get; set; }
+
 
 
 
