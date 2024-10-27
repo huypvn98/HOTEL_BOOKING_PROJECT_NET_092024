@@ -10,6 +10,7 @@ using System.Text;
 using System.Reflection;
 using BookingHotel.Core.Repository.Interface;
 using BookingHotel.Api.Services;
+using BookingBooking.Api.Services;
 namespace BookingHotel.Core
 {
     public static class ConfigureServices
@@ -90,6 +91,8 @@ namespace BookingHotel.Core
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IRoomDetailService, RoomDetailService>();
+            services.AddScoped<IBookingGenericRepository, BookingGenericRepository>();
+            services.AddScoped<BookingService>();
 
             return services;
         }
