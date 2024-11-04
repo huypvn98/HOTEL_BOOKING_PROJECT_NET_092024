@@ -55,6 +55,11 @@ namespace BookingHotel.Core.Services
             return list;
         }
 
+        public async Task<List<Room>> getListRoomsByHotelId(int idHotel) { 
+          var rooms =  _unitOfWork.Repository<Room>().GetAllAsync().Result.Where(x => x.HotelID == idHotel).ToList();
+            return  rooms;
+        }
+
         public Task<Room> getRoomById(int id)
         {
             var room= _unitOfWork.Repository<Room>().GetByIdAsync(id);

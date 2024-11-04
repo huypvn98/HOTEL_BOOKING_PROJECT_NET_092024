@@ -12,6 +12,7 @@ namespace BookingHotel.Core.Services
     {
         Task<List<Room>> getAll();
         Task<Room> getRoomById(int id);
+        Task<List<Room>> getListRoomsByHotelId(int idHotel);
         Task<RetureReponse> InsertRoom(RoomDTO roomDTO);
         Task<RetureReponse> UpdateRoom(int idRoom, RoomDTO roomDTO);
         Task<RetureReponse> DeleteRoom(int idRoom);

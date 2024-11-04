@@ -67,6 +67,54 @@ namespace BookingHotel.Api.Controllers
             }
           
         }
+        [HttpGet("GetAllRoomByHotel/{idHotel}")]
+        public async Task<IActionResult> GetRoomByIdHotel(int idHotel)
+        {
+            var reponse = new RetureReponse();
+            try
+            {
+                var rooms = await _roomService.getListRoomsByHotelId(idHotel);
+                if (rooms.Count == 0)
+                {
+                    reponse.returnCode = 404;
+                    reponse.returnMessage = "Không tìm thấy phòng nào";
+                    return NotFound(reponse);
+                }
+                var listRoomResponse= new List<RoomDTO>();
+                foreach(var itemRoom in rooms)
+                {
+                    var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x => x.RoomID == itemRoom.RoomID).FirstOrDefault();
+                    var listImgInDb = _unitOfWork.Repository<ImageRooms>().GetAllAsync().Result.Where(x => x.RoomID == itemRoom.RoomID).ToList();
+
+                    //var listImage= listImgInDb.Select(x=>new List<string>
+                    //{
+
+                    //})
+                    var RoomDTO = new RoomDTOResponse()
+                    {
+                        hotelID = itemRoom.HotelID,
+                        roomNumber = itemRoom.RoomNumber,
+                        roomSquare = itemRoom.RoomSquare,
+                        isActive = itemRoom.IsActive,
+                        idBed = bed.BedID,
+                        iddetail = itemRoom.RoomDetailID,
+                        quantity = bed.Quantity,
+                        Images = listImgInDb.Select(x => x.NameFileImg).ToList()
+                    };
+                    listRoomResponse.Add(RoomDTO);
+                }
+               
+                return Ok(listRoomResponse);
+
+            }
+            catch (Exception ex)
+            {
+                reponse.returnCode = 500;
+                reponse.returnMessage = "Lỗi dữ liệu " + ex.Message;
+                return BadRequest(reponse);
+            }
+
+        }
         // GET api/<RoomController>/5
         [HttpGet("getAll")]
         public async Task<IActionResult> GetAll()
