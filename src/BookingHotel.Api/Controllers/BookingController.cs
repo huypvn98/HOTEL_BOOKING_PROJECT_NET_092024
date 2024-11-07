@@ -18,7 +18,7 @@ namespace BookingBooking.Api.Controllers
         }
 
         [HttpGet("GetAll")]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetAllBookings([FromQuery] string keyword = "")
+        public async Task<ActionResult<IEnumerable<BookingResponseDto>>> GetAllBookings([FromQuery] string keyword = "")
         {
             try
             {
@@ -56,7 +56,6 @@ namespace BookingBooking.Api.Controllers
                     return BadRequest(new { message = result.Message });
                 }
 
-                // Trả về mã 201 khi khách sạn được thêm thành công
                 return StatusCode(201, result);
             }
             catch (ArgumentException ex)

@@ -1,5 +1,6 @@
 using BackendAPIBookingHotel.Model;
 using BookingHotel.Core;
+using BookingHotel.Core.Models;
 using BookingHotel.Core.Repository.Interface;
 using Microsoft.Extensions.Logging;
 
@@ -21,21 +22,35 @@ namespace BookingBooking.Api.Services
       _logger = logger;
     }
 
-    public async Task<ResponseData<IEnumerable<Booking>>> GetAllBookingsAsync(string keyword)
+    public async Task<ResponseData<IEnumerable<BookingResponseDto>>> GetAllBookingsAsync(string keyword)
     {
-      var bookings = await _bookingGenericRepository.GetAllAsync(
-          //h => h.isActive == true
-          );
+      var bookings = await _bookingGenericRepository.GetAllAsync(b => b.isActive); // Lấy tất cả booking đang hoạt động
+      var contacts = await _unitOfWork.Repository<Contact>().GetAllAsync(); // Await the contacts
+      var rooms = await _unitOfWork.Repository<Room>().GetAllAsync(); // Await the rooms
+      var roomDetails = await _unitOfWork.Repository<RoomDetail>().GetAllAsync(); // Await the room details
+      var persons = await _unitOfWork.Repository<Person>().GetAllAsync();
 
-      //if (!string.IsNullOrWhiteSpace(keyword))
-      //{
-      //  bookings = bookings
-      //      .Where(h => h.BookingName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
-      //                  h.Description.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-      //      .ToList();
-      //}
+      var bookingDetails = from booking in bookings
+                         join contact in contacts on booking.ContactID equals contact.Id into contactGroup
+                         from contact in contactGroup.DefaultIfEmpty() // Left join
+                         join p in persons on booking.UserID equals p.PersonID into personGroup
+                         from person in personGroup.DefaultIfEmpty()
+                         join room in rooms on booking.RoomID equals room.RoomID into roomGroup
+                         from room in roomGroup.DefaultIfEmpty() // Left join
+                         join roomDetail in roomDetails on room.RoomDetailID equals roomDetail.RoomDetailID into roomDetailGroup
+                         from roomDetail in roomDetailGroup.DefaultIfEmpty() // Left join
+                         select new BookingResponseDto
+                         {
+                             BookingID = booking.BookingID,
+                             FromDate = booking.FromDate,
+                             ToDate = booking.ToDate,
+                             BookingStatus = booking.BookingStatus,
+                             CustomerName = contact != null ? contact.FullName : person.LastName + person.FirstName, // Lấy tên khách hàng
+                             RoomType = roomDetail.RoomType// Lấy loại phòng
+                         };
 
-      return new ResponseData<IEnumerable<Booking>>(200, bookings, "Success");
+
+      return new ResponseData<IEnumerable<BookingResponseDto>>(200, bookingDetails, "Success");
     }
 
     public async Task<ResponseData<Booking>> GetBookingByIdAsync(int id)
@@ -56,12 +71,14 @@ namespace BookingBooking.Api.Services
       {
         CreatedDate = DateTime.UtcNow.AddHours(7),
         RoomID = requestData.RoomID,
-        CustomerID = requestData.CustomerID,
+        ContactID = requestData.ContactID,
+        UserID = requestData.UserID,
         DepositID = requestData.DepositID,
         FromDate = requestData.FromDate,
         CheckInDate = requestData.CheckInDate,
         CheckOutDate = requestData.CheckOutDate,
         BookingStatus = requestData.BookingStatus,
+        Note = requestData.Note,
         ToDate = requestData.ToDate // Khách sạn mới luôn active
       };
 
@@ -79,13 +96,14 @@ namespace BookingBooking.Api.Services
       if (existingBooking == null)
         return new ResponseData<string>(404, null, $"Booking with ID {id} not found.");
 
-            existingBooking.ToDate = requestData.ToDate;
-            existingBooking.RoomID = requestData.RoomID;
-            existingBooking.DepositID = requestData.DepositID;
-            existingBooking.FromDate = requestData.FromDate;
-            existingBooking.CheckInDate = requestData.CheckInDate;
-            existingBooking.CheckOutDate = requestData.CheckOutDate;
-            existingBooking.BookingStatus = requestData.BookingStatus;
+       existingBooking.ToDate = requestData.ToDate;
+       existingBooking.RoomID = requestData.RoomID;
+       existingBooking.DepositID = requestData.DepositID;
+       existingBooking.FromDate = requestData.FromDate;
+       existingBooking.CheckInDate = requestData.CheckInDate;
+       existingBooking.CheckOutDate = requestData.CheckOutDate;
+       existingBooking.BookingStatus = requestData.BookingStatus;
+            existingBooking.Note = requestData.Note;
 
       // Lưu thay đổi vào database
       await _unitOfWork.Repository<Booking>().UpdateAsync(existingBooking);
@@ -110,27 +128,27 @@ namespace BookingBooking.Api.Services
       return new ResponseData<string>(200, null, "Booking deleted successfully!!!.");
     }
 
-    public async Task<ResponseData<string>> UnIsActiveBookingAsync(int id)
-    {
-      // Tìm khách sạn với ID được cung cấp
-      var existingBooking = await _bookingGenericRepository.GetByIdAsync(id);
+    //public async Task<ResponseData<string>> UnIsActiveBookingAsync(int id)
+    //{
+    //  // Tìm khách sạn với ID được cung cấp
+    //  var existingBooking = await _bookingGenericRepository.GetByIdAsync(id);
 
-      if (existingBooking == null)
-        return new ResponseData<string>(404, null, $"Booking with ID {id} not found.");
+    //  if (existingBooking == null)
+    //    return new ResponseData<string>(404, null, $"Booking with ID {id} not found.");
 
-      // Kiểm tra nếu khách sạn đã active
-      if (existingBooking.isActive == true)
-        return new ResponseData<string>(400, null, "Booking is already active.");
+    //  // Kiểm tra nếu khách sạn đã active
+    //  if (existingBooking.isActive == true)
+    //    return new ResponseData<string>(400, null, "Booking is already active.");
 
-      // Cập nhật trạng thái isActive thành true (khôi phục khách sạn)
-      existingBooking.isActive = true;
-      existingBooking.UpdatedDate = DateTime.UtcNow.AddHours(7);
+    //  // Cập nhật trạng thái isActive thành true (khôi phục khách sạn)
+    //  existingBooking.isActive = true;
+    //  existingBooking.UpdatedDate = DateTime.UtcNow.AddHours(7);
 
-      // Lưu thay đổi vào database
-      await _unitOfWork.Repository<Booking>().UpdateAsync(existingBooking);
-      await _unitOfWork.SaveChangesAsync();
+    //  // Lưu thay đổi vào database
+    //  await _unitOfWork.Repository<Booking>().UpdateAsync(existingBooking);
+    //  await _unitOfWork.SaveChangesAsync();
 
-      return new ResponseData<string>(200, null, "Booking is now active.");
-    }
+    //  return new ResponseData<string>(200, null, "Booking is now active.");
+    //}
   }
 }

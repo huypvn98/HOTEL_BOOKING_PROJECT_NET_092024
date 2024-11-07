@@ -37,6 +37,7 @@ namespace BookingHotel.Core.Persistence
         public DbSet<Bed> Beds { get; set; }
         public DbSet<BedRoom> BedRooms { get; set; }
         public DbSet<ImageRooms> ImageRooms { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
 
 
 
@@ -210,11 +211,11 @@ namespace BookingHotel.Core.Persistence
                 .HasForeignKey(ur => ur.RoleID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Booking>()
-                .HasOne(b => b.Customer)
-                .WithMany(c => c.Bookings)
-                .HasForeignKey(b => b.CustomerID)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Booking>()
+            //    .HasOne(b => b.Customer)
+            //    .WithMany(c => c.Bookings)
+            //    .HasForeignKey(b => b.Co)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Room)

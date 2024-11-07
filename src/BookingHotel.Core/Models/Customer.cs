@@ -13,4 +13,5 @@ namespace BackendAPIBookingHotel.Model
 		public Person? Person { get; set; }
 		public ICollection<Booking>? Bookings { get; set; }
 	}
+
 }
