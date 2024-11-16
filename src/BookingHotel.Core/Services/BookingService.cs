@@ -29,6 +29,7 @@ namespace BookingBooking.Api.Services
       var rooms = await _unitOfWork.Repository<Room>().GetAllAsync(); // Await the rooms
       var roomDetails = await _unitOfWork.Repository<RoomDetail>().GetAllAsync(); // Await the room details
       var persons = await _unitOfWork.Repository<Person>().GetAllAsync();
+      var hotels = await _unitOfWork.Repository<Hotel>().GetAllAsync();
 
       var bookingDetails = from booking in bookings
                          join contact in contacts on booking.ContactID equals contact.Id into contactGroup
@@ -39,6 +40,8 @@ namespace BookingBooking.Api.Services
                          from room in roomGroup.DefaultIfEmpty() // Left join
                          join roomDetail in roomDetails on room.RoomDetailID equals roomDetail.RoomDetailID into roomDetailGroup
                          from roomDetail in roomDetailGroup.DefaultIfEmpty() // Left join
+                         join hotel in hotels on room.HotelID equals hotel.HotelID into hotelGroup
+                         from hotel in hotelGroup.DefaultIfEmpty()
                          select new BookingResponseDto
                          {
                              BookingID = booking.BookingID,
@@ -46,7 +49,8 @@ namespace BookingBooking.Api.Services
                              ToDate = booking.ToDate,
                              BookingStatus = booking.BookingStatus,
                              CustomerName = contact != null ? contact.FullName : person.LastName + person.FirstName, // Lấy tên khách hàng
-                             RoomType = roomDetail.RoomType// Lấy loại phòng
+                             RoomType = roomDetail.RoomType,// Lấy loại phòng
+                             HotelName = hotel.HotelName
                          };
 
 
@@ -66,6 +70,14 @@ namespace BookingBooking.Api.Services
 }
     public async Task<ResponseData<Booking>> InsertBookingAsync(Booking_InsertRequestData requestData)
     {
+      //Kiểm tra nếu cả ContactID và UserID null thì báo lỗi
+      var contactExists = await _unitOfWork.Repository<Contact>().GetByIdAsync(requestData.ContactID.Value);
+      var userExists = await _unitOfWork.Repository<User>().GetByIdAsync(requestData.UserID.Value);
+
+      if (contactExists == null && userExists == null)
+      {
+        return new ResponseData<Booking>(400, null, "Missing client information.");
+      }
 
       var newBooking = new Booking
       {

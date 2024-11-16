@@ -57,5 +57,6 @@ namespace BackendAPIBookingHotel.Model
     public string BookingStatus { get; set; }
     public string CustomerName { get; set; }
     public string RoomType { get; set; }
+    public string HotelName {get; set; }
 }
 }
