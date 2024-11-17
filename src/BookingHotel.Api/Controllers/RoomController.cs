@@ -41,11 +41,9 @@ namespace BookingHotel.Api.Controllers
                 }
                 var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x => x.RoomID == room.RoomID).FirstOrDefault();
                 var listImgInDb = _unitOfWork.Repository<ImageRooms>().GetAllAsync().Result.Where(x => x.RoomID == room.RoomID).ToList();
-
-                //var listImage= listImgInDb.Select(x=>new List<string>
-                //{
-
-                //})
+                
+                
+             //   var imageUrl = $"{Request.Scheme}://{Request.Host}/Images/{fileName}";
                 var RoomDTO = new RoomDTOResponse()
                 {
                     hotelID = room.HotelID,
@@ -55,7 +53,7 @@ namespace BookingHotel.Api.Controllers
                     idBed=bed.BedID,
                     iddetail=room.RoomDetailID,
                     quantity=bed.Quantity,
-                    Images= listImgInDb.Select(x => x.NameFileImg).ToList()
+                    ImageList = listImgInDb.Select(x => $"{Request.Scheme}://{Request.Host}/Images/{x.NameFileImg}").ToList()
                 };
                 return Ok(RoomDTO);
             
@@ -80,7 +78,7 @@ namespace BookingHotel.Api.Controllers
                     reponse.returnMessage = "Không tìm thấy phòng nào";
                     return NotFound(reponse);
                 }
-                var listRoomResponse= new List<RoomDTO>();
+                var listRoomResponse= new List<RoomDTOResponse>();
                 foreach(var itemRoom in rooms)
                 {
                     var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x => x.RoomID == itemRoom.RoomID).FirstOrDefault();
@@ -99,7 +97,7 @@ namespace BookingHotel.Api.Controllers
                         idBed = bed.BedID,
                         iddetail = itemRoom.RoomDetailID,
                         quantity = bed.Quantity,
-                        Images = listImgInDb.Select(x => x.NameFileImg).ToList()
+                        ImageList = listImgInDb.Select(x => $"{Request.Scheme}://{Request.Host}/Images/{x.NameFileImg}").ToList()
                     };
                     listRoomResponse.Add(RoomDTO);
                 }
