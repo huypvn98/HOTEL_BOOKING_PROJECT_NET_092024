@@ -1,6 +1,7 @@
 ﻿using BackendAPIBookingHotel.Model;
 using BookingHotel.Core.DTO;
 using BookingHotel.Core.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +52,9 @@ namespace BookingHotel.Core.Services
         public async Task<List<Room>> getAll()
         {
             var list = new List<Room>();
-            list= (List<Room>) await _unitOfWork.Repository<Room>().GetAllAsync();
+            list= (List<Room>)  _context.Rooms.Include(x => x.RoomDetail).ToList();
+           
+
             return list;
         }
 
@@ -112,7 +115,7 @@ namespace BookingHotel.Core.Services
                         await image.CopyToAsync(stream);
                     }
                     var imgRoom = new ImageRooms();
-                    imgRoom.NameFileImg = fileName;
+                    imgRoom.NameFileImg = "/Images/" + fileName;
                     imgRoom.RoomID = room.RoomID;
                     imgRooms.Add(imgRoom);
                 }

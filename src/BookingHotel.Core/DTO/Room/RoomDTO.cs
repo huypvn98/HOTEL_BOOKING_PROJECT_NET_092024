@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BookingHotel.Core.DTO
@@ -18,13 +19,14 @@ namespace BookingHotel.Core.DTO
    
        public int idBed {get;set;}   
        public int quantity { get; set; }
+        [JsonIgnore]
         public List<IFormFile>? Images { get; set; }
         //ListImage
 
     }
     public class RoomDTOResponse:RoomDTO
     {
-        public List<string>? Images { get; set; }
+        public List<string>? ImageList { get; set; }
         //ListImage
 
     }
