@@ -125,19 +125,20 @@ namespace BookingHotel.Api.Controllers
                if (room.Count>0)
                 {
                     var listRoom = new List<RoomDTO>();
-                    //foreach(var itemRoom in room)
-                    //{
-                    //    var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x=>x.RoomID==itemRoom.RoomID).ToList();
-                    //    var roomDTO = new RoomDTO();
-                    //    roomDTO.ro
-                    //}
+                    foreach (var itemRoom in room)
+                    {
+                        foreach (var img in itemRoom.ImageRooms)
+                        {
+                            img.NameFileImg = $"{Request.Scheme}://{Request.Host}/Images/{img.NameFileImg}";
+                        }
+                    }
                     //var roomDTO = room.Select(x => new RoomDTO()
                     //{
                     //    hotelID = x.HotelID,
                     //    roomNumber = x.RoomNumber,
                     //    roomSquare = x.RoomSquare,
                     //    isActive = x.IsActive,
-                       
+
                     //});
                     return Ok(room);
                 }

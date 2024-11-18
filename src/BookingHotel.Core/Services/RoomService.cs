@@ -1,4 +1,5 @@
-﻿using BackendAPIBookingHotel.Model;
+﻿using Azure.Core;
+using BackendAPIBookingHotel.Model;
 using BookingHotel.Core.DTO;
 using BookingHotel.Core.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -52,9 +53,8 @@ namespace BookingHotel.Core.Services
         public async Task<List<Room>> getAll()
         {
             var list = new List<Room>();
-            list= (List<Room>)  _context.Rooms.Include(x => x.RoomDetail).ToList();
-           
-
+            list= (List<Room>)  _context.Rooms.Include(x => x.RoomDetail).Include(x=>x.ImageRooms).Include(x=>x.BedRooms).ThenInclude(x=>x.bed).ToList();
+            
             return list;
         }
 
