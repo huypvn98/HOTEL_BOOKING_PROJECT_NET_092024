@@ -93,6 +93,7 @@ namespace BookingHotel.Core
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IRoomDetailService, RoomDetailService>();
             services.AddScoped<IBookingGenericRepository, BookingGenericRepository>();
+            services.AddScoped<IVnPayService, VnPayService>();
             services.AddScoped<BookingService>();
 
             return services;
