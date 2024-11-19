@@ -39,23 +39,11 @@ namespace BookingHotel.Api.Controllers
                     reponse.returnMessage = "Không tìm thấy phòng";
                     return NotFound(reponse);
                 }
-                var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x => x.RoomID == room.RoomID).FirstOrDefault();
-                var listImgInDb = _unitOfWork.Repository<ImageRooms>().GetAllAsync().Result.Where(x => x.RoomID == room.RoomID).ToList();
-                
-                
-             //   var imageUrl = $"{Request.Scheme}://{Request.Host}/Images/{fileName}";
-                var RoomDTO = new RoomDTOResponse()
+                foreach (var img in room.ImageRooms)
                 {
-                    hotelID = room.HotelID,
-                    roomNumber = room.RoomNumber,
-                    roomSquare = room.RoomSquare,
-                    isActive = room.IsActive,
-                    idBed=bed.BedID,
-                    iddetail=room.RoomDetailID,
-                    quantity=bed.Quantity,
-                    ImageList = listImgInDb.Select(x => $"{Request.Scheme}://{Request.Host}/Images/{x.NameFileImg}").ToList()
-                };
-                return Ok(RoomDTO);
+                    img.NameFileImg = $"{Request.Scheme}://{Request.Host}/Images/{img.NameFileImg}";
+                }
+                return Ok(room);
             
             }catch (Exception ex)
             {

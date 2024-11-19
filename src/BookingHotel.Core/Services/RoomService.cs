@@ -63,9 +63,9 @@ namespace BookingHotel.Core.Services
             return  rooms;
         }
 
-        public Task<Room> getRoomById(int id)
+        public async Task<Room> getRoomById(int id)
         {
-            var room= _unitOfWork.Repository<Room>().GetByIdAsync(id);
+            var room =  _context.Rooms.Include(x => x.RoomDetail).Include(x => x.ImageRooms).Include(x => x.BedRooms).ThenInclude(x => x.bed).FirstOrDefault();
             return room;
         }
 
