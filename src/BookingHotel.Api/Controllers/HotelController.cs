@@ -56,7 +56,13 @@ namespace BookingHotel.Api.Controllers
 
             if (result.StatusCode == 404)
                 return NotFound(result.Message);
-
+            foreach (var itemRoom in result.Data.Rooms)
+            {
+                foreach (var img in itemRoom.ImageRooms)
+                {
+                    img.NameFileImg = $"{Request.Scheme}://{Request.Host}/Images/{img.NameFileImg}";
+                }
+            }
             return Ok(result.Data);
         }
 

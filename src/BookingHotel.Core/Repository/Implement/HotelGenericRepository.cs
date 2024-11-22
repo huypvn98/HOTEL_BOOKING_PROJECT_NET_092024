@@ -58,7 +58,13 @@ public class HotelGenericRepository : IHotelGenericRepository
 
     public async Task<Hotel> GetByIdAsync(int id)
     {
-        return await _context.Hotels.FindAsync(id);
+        return  _context.Hotels.Include(x => x.Rooms)
+                .ThenInclude(x => x.RoomDetail)
+            .Include(x => x.Rooms)
+                .ThenInclude(x => x.ImageRooms)
+            .Include(x => x.Rooms)
+                .ThenInclude(x => x.BedRooms)
+                .ThenInclude(x => x.bed).Where(x=>x.HotelID==id).FirstOrDefault()!;
     }
 
     public async Task UpdateAsync(Hotel entity)
