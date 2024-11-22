@@ -1,5 +1,6 @@
 ﻿using BackendAPIBookingHotel.Model;
 using BookingHotel.Api.Services;
+using BookingHotel.Core.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -24,6 +25,21 @@ namespace BookingHotel.Api.Controllers
             try
             {
                 var hotels = await _hotelService.GetAllHotelsAsync(keyword);
+                foreach(var hotel in hotels.Data)
+                {
+                    Console.WriteLine(hotel);
+                    if (hotel.Rooms.Count > 0)
+                    {
+                        var listRoom = new List<RoomDTO>();
+                        foreach (var itemRoom in hotel.Rooms)
+                        {
+                                foreach (var img in itemRoom.ImageRooms)
+                                {
+                                    img.NameFileImg = $"{Request.Scheme}://{Request.Host}/Images/{img.NameFileImg}";
+                                }
+                        }
+                    }
+                }
                 return Ok(hotels);
             }
             catch (Exception ex)

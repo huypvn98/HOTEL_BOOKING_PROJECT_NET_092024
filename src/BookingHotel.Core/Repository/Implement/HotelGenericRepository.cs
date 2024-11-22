@@ -41,7 +41,14 @@ public class HotelGenericRepository : IHotelGenericRepository
 
     public async Task<IEnumerable<Hotel>> GetAllAsync(Expression<Func<Hotel, bool>> predicate)
     {
-        return await _context.Hotels.Where(predicate).ToListAsync();
+        return await _context.Hotels.Where(predicate)
+            .Include(x=>x.Rooms)
+                .ThenInclude(x => x.RoomDetail)
+            .Include(x => x.Rooms)
+                .ThenInclude(x => x.ImageRooms)
+            .Include(x => x.Rooms)
+                .ThenInclude(x => x.BedRooms)
+                .ThenInclude(x => x.bed).ToListAsync();
     }
 
     public async Task<Hotel> GetAsync(Expression<Func<Hotel, bool>> predicate)
