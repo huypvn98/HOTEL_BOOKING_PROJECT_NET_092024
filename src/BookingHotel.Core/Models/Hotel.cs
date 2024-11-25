@@ -1,4 +1,6 @@
-﻿namespace BackendAPIBookingHotel.Model
+﻿using Microsoft.AspNetCore.Http;
+
+namespace BackendAPIBookingHotel.Model
 {
 	public class Hotel
 	{
@@ -9,7 +11,13 @@
 
 		public string Description { get; set; }
 
+		public string? UrlImage { get; set; }
+
 		public DateTime CreatedDate { get; set; }
+		public DateTime? UpdatedDate { get; set; }
+
+		public bool? isActive{get; set;} = true;
+
 
 		public ICollection<Room> Rooms { get; set; }
 

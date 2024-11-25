@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using BookingHotel.Core.Persistence;
 using BookingHotel.Core.Repository.Implement;
 using BookingHotel.Core.Repository.Interface;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace BookingHotel.Core
 {
-    public class UnitOfWork : IUnitOfWork 
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly HotelBookingDbContext _context;
 
@@ -30,6 +31,11 @@ namespace BookingHotel.Core
         public void Dispose()
         {
             _context.Dispose();
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
         }
     }
 }

@@ -70,58 +70,58 @@ namespace BookingHotel.Api.Services
             {
                 try
                 {
-                    if (string.IsNullOrWhiteSpace(requestData.HotelName))
-                        return new ResponseData<Hotel>(400, null, "HotelName cannot be empty.");
+      if (string.IsNullOrWhiteSpace(requestData.HotelName))
+        return new ResponseData<Hotel>(400, null, "HotelName cannot be empty.");
 
-                    var hotelNameLower = requestData.HotelName.ToLower();
+      var hotelNameLower = requestData.HotelName.ToLower();
 
-                    // Lấy dữ liệu từ database và chuyển thành bộ nhớ để so sánh
-                    var existingHotel = await _hotelGenericRepository
-                        .GetAllAsync(h => h.HotelName.ToLower() == hotelNameLower);
+      // Lấy dữ liệu từ database và chuyển thành bộ nhớ để so sánh
+      var existingHotel = await _hotelGenericRepository
+          .GetAllAsync(h => h.HotelName.ToLower() == hotelNameLower);
 
-                    if (existingHotel.Any())
-                        return new ResponseData<Hotel>(400, null, "HotelName already exists.");
+      if (existingHotel.Any())
+        return new ResponseData<Hotel>(400, null, "HotelName already exists.");
 
-                    // Xử lý ảnh nếu có
-                    string imageUrl = null;
-                    if (requestData.Image != null)
-                    {
-                        // Thư mục lưu ảnh sẽ là wwwroot/Images/Hotel
-                        var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images/Hotel");
-                        if (!Directory.Exists(imageDirectory))
-                        {
-                            Directory.CreateDirectory(imageDirectory);
-                        }
+      // Xử lý ảnh nếu có
+      string imageUrl = null;
+      if (requestData.Image != null)
+      {
+        // Thư mục lưu ảnh sẽ là wwwroot/Images/Hotel
+        var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images/Hotel");
+        if (!Directory.Exists(imageDirectory))
+        {
+          Directory.CreateDirectory(imageDirectory);
+        }
 
-                        // Tạo tên file duy nhất
-                        var fileName = $"{Guid.NewGuid()}_{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(requestData.Image.FileName)}";
-                        var filePath = Path.Combine(imageDirectory, fileName);
+        // Tạo tên file duy nhất
+        var fileName = $"{Guid.NewGuid()}_{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(requestData.Image.FileName)}";
+        var filePath = Path.Combine(imageDirectory, fileName);
 
-                        // Lưu file ảnh vào thư mục wwwroot/Images/Hotel
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await requestData.Image.CopyToAsync(stream);
-                        }
+        // Lưu file ảnh vào thư mục wwwroot/Images/Hotel
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+          await requestData.Image.CopyToAsync(stream);
+        }
 
-                        // Đường dẫn URL của ảnh
-                        imageUrl = $"/Images/Hotel/{fileName}";
-                    }
+        // Đường dẫn URL của ảnh
+        imageUrl = $"/Images/Hotel/{fileName}";
+      }
 
-                    var newHotel = new Hotel
-                    {
-                        CreatedDate = DateTime.UtcNow,
-                        HotelName = requestData.HotelName,
-                        Description = requestData.Description,
+      var newHotel = new Hotel
+      {
+        CreatedDate = DateTime.UtcNow,
+        HotelName = requestData.HotelName,
+        Description = requestData.Description,
                         AddressID = requestData.AddressID,
-                        UrlImage = imageUrl, // Lưu đường dẫn ảnh
-                        isActive = true // Khách sạn mới luôn active
-                    };
+        UrlImage = imageUrl, // Lưu đường dẫn ảnh
+        isActive = true // Khách sạn mới luôn active
+      };
 
-                    await _unitOfWork.Repository<Hotel>().AddAsync(newHotel);
-                    await _unitOfWork.SaveChangesAsync();
+      await _unitOfWork.Repository<Hotel>().AddAsync(newHotel);
+      await _unitOfWork.SaveChangesAsync();
 
                     await transaction.CommitAsync();
-                    return new ResponseData<Hotel>(201, newHotel, "Hotel added successfully.");
+      return new ResponseData<Hotel>(201, newHotel, "Hotel added successfully.");
 
                 }
                 catch (Exception ex)

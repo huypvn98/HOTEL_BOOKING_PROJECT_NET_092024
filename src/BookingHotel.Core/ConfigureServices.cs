@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Reflection;
+using BookingHotel.Core.Repository.Interface;
+using BookingHotel.Api.Services;
+using BookingBooking.Api.Services;
 namespace BookingHotel.Core
 {
     public static class ConfigureServices
@@ -83,12 +86,15 @@ namespace BookingHotel.Core
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<AuthService>();
+            services.AddScoped<IHotelGenericRepository, HotelGenericRepository>();
+            services.AddScoped<HotelService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<IRoomDetailService, RoomDetailService>();
             services.AddScoped<IBookingGenericRepository, BookingGenericRepository>();
+            services.AddScoped<IVnPayService, VnPayService>();
             services.AddScoped<BookingService>();
 
             return services;

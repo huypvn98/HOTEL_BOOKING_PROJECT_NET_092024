@@ -1,6 +1,11 @@
 ﻿using BackendAPIBookingHotel.Model;
+using BookingHotel.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
+/*
+    dotnet ef migrations add UpdateUserTableTT --startup-project ../BookingHotel.Api
+    dotnet ef database update --startup-project ../BookingHotel.Api
+*/
 namespace BookingHotel.Core.Persistence
 {
     public class HotelBookingDbContext : DbContext
@@ -29,6 +34,11 @@ namespace BookingHotel.Core.Persistence
         public DbSet<BookingDetail> BookingDetails { get; set; }
         public DbSet<Deposit> Deposits { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<Bed> Beds { get; set; }
+        public DbSet<BedRoom> BedRooms { get; set; }
+        public DbSet<ImageRooms> ImageRooms { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
+
 
 
 
@@ -127,6 +137,8 @@ namespace BookingHotel.Core.Persistence
 
             modelBuilder.Entity<Invoice>()
                 .HasKey(i => i.InvoiceID);
+            modelBuilder.Entity<Bed>()
+              .HasKey(i => i.BedID);
 
             // Các cấu hình khóa ngoại
             modelBuilder.Entity<Address>()
@@ -199,11 +211,11 @@ namespace BookingHotel.Core.Persistence
                 .HasForeignKey(ur => ur.RoleID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Booking>()
-                .HasOne(b => b.Customer)
-                .WithMany(c => c.Bookings)
-                .HasForeignKey(b => b.CustomerID)
-                .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Booking>()
+            //    .HasOne(b => b.Customer)
+            //    .WithMany(c => c.Bookings)
+            //    .HasForeignKey(b => b.Co)
+            //    .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Room)

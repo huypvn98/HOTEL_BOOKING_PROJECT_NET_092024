@@ -60,6 +60,11 @@ namespace BookingHotel.Core.Repository.Implement
         {
             return await _dbSet.Where(predicate).ToListAsync();
         }
+
+        public async Task AddListAsync(List<T> entitys)
+        {
+            await _dbSet.AddRangeAsync(entitys);
+        }
     }
 
 }

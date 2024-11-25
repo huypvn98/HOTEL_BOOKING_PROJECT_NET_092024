@@ -23,6 +23,8 @@ public class User
 
      public string? ImageUrl { get; set; }  
     public ICollection<UserRole> UserRoles { get; set; }
+
+    public bool isActive { get; set; } = true;
 }
 
 }

@@ -2,6 +2,7 @@
 using BackendAPIBookingHotel.Model;
 using BookingHotel.Core;
 using BookingHotel.Core.DTO;
+using BookingHotel.Core.Models;
 using BookingHotel.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,14 +39,11 @@ namespace BookingHotel.Api.Controllers
                     reponse.returnMessage = "Không tìm thấy phòng";
                     return NotFound(reponse);
                 }
-                var RoomDTO = new RoomDTO()
+                foreach (var img in room.ImageRooms)
                 {
-                    hotelID = room.HotelID,
-                    roomNumber = room.RoomNumber,
-                    roomSquare = room.RoomSquare,
-                    isActive = room.IsActive,
-                };
-                return Ok(RoomDTO);
+                    img.NameFileImg = $"{Request.Scheme}://{Request.Host}/Images/{img.NameFileImg}";
+                }
+                return Ok(room);
             
             }catch (Exception ex)
             {
@@ -54,6 +52,54 @@ namespace BookingHotel.Api.Controllers
                 return BadRequest(reponse);
             }
           
+        }
+        [HttpGet("GetAllRoomByHotel/{idHotel}")]
+        public async Task<IActionResult> GetRoomByIdHotel(int idHotel)
+        {
+            var reponse = new RetureReponse();
+            try
+            {
+                var rooms = await _roomService.getListRoomsByHotelId(idHotel);
+                if (rooms.Count == 0)
+                {
+                    reponse.returnCode = 404;
+                    reponse.returnMessage = "Không tìm thấy phòng nào";
+                    return NotFound(reponse);
+                }
+                var listRoomResponse= new List<RoomDTOResponse>();
+                foreach(var itemRoom in rooms)
+                {
+                    var bed = _unitOfWork.Repository<BedRoom>().GetAllAsync().Result.Where(x => x.RoomID == itemRoom.RoomID).FirstOrDefault();
+                    var listImgInDb = _unitOfWork.Repository<ImageRooms>().GetAllAsync().Result.Where(x => x.RoomID == itemRoom.RoomID).ToList();
+
+                    //var listImage= listImgInDb.Select(x=>new List<string>
+                    //{
+
+                    //})
+                    var RoomDTO = new RoomDTOResponse()
+                    {
+                        hotelID = itemRoom.HotelID,
+                        roomNumber = itemRoom.RoomNumber,
+                        roomSquare = itemRoom.RoomSquare,
+                        isActive = itemRoom.IsActive,
+                        idBed = bed.BedID,
+                        iddetail = itemRoom.RoomDetailID,
+                        quantity = bed.Quantity,
+                        ImageList = listImgInDb.Select(x => $"{Request.Scheme}://{Request.Host}/Images/{x.NameFileImg}").ToList()
+                    };
+                    listRoomResponse.Add(RoomDTO);
+                }
+               
+                return Ok(listRoomResponse);
+
+            }
+            catch (Exception ex)
+            {
+                reponse.returnCode = 500;
+                reponse.returnMessage = "Lỗi dữ liệu " + ex.Message;
+                return BadRequest(reponse);
+            }
+
         }
         // GET api/<RoomController>/5
         [HttpGet("getAll")]
@@ -66,14 +112,23 @@ namespace BookingHotel.Api.Controllers
                 
                if (room.Count>0)
                 {
-                    var roomDTO = room.Select(x => new RoomDTO()
+                    var listRoom = new List<RoomDTO>();
+                    foreach (var itemRoom in room)
                     {
-                        hotelID = x.HotelID,
-                        roomNumber = x.RoomNumber,
-                        roomSquare = x.RoomSquare,
-                        isActive = x.IsActive
-                    }) ;
-                    return Ok(roomDTO);
+                        foreach (var img in itemRoom.ImageRooms)
+                        {
+                            img.NameFileImg = $"{Request.Scheme}://{Request.Host}/Images/{img.NameFileImg}";
+                        }
+                    }
+                    //var roomDTO = room.Select(x => new RoomDTO()
+                    //{
+                    //    hotelID = x.HotelID,
+                    //    roomNumber = x.RoomNumber,
+                    //    roomSquare = x.RoomSquare,
+                    //    isActive = x.IsActive,
+
+                    //});
+                    return Ok(room);
                 }
                 reponse.returnCode = 404;
                 reponse.returnMessage = "Không dữ liệu nào được tìm thấy";
@@ -90,7 +145,7 @@ namespace BookingHotel.Api.Controllers
         }
         // POST api/<RoomController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] RoomDTO roomRequest)
+        public async Task<IActionResult> Post([FromForm] RoomDTO roomRequest)
         {
 
             var returnRespone = new RetureReponse();
@@ -104,6 +159,28 @@ namespace BookingHotel.Api.Controllers
                     returnRespone.returnMessage = "Khách sạn không tìm thấy";
                     return NotFound(returnRespone);
                 }
+                var detailHotel = _unitOfWork.Repository<RoomDetail>().GetByIdAsync(roomRequest.iddetail).Result;
+                if (detailHotel == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Chi tiết phòng không tìm thấy";
+                    return NotFound(returnRespone);
+                }
+                if (roomRequest.Images.Count == 0)
+                {
+                    returnRespone.returnCode = 400;
+                    returnRespone.returnMessage = "Vui lòng chọn ảnh";
+                    return BadRequest(returnRespone);
+
+                }
+
+                var bed = _unitOfWork.Repository<Bed>().GetByIdAsync(roomRequest.idBed).Result;
+                if (bed == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Loại giường không tìm thấy";
+                    return NotFound(returnRespone);
+                }
                 returnRespone = _roomService.InsertRoom(roomRequest).Result;
                 return Ok(returnRespone);
             }catch(Exception ex)
@@ -115,7 +192,7 @@ namespace BookingHotel.Api.Controllers
 
         // POST api/<RoomController>
         [HttpPut("Edit")]
-        public async Task<IActionResult> Edit(int id,[FromBody] RoomDTO roomRequest )
+        public async Task<IActionResult> Edit(int id,[FromForm] RoomDTO roomRequest )
         {
             var returnRespone = new RetureReponse();
 
@@ -133,7 +210,29 @@ namespace BookingHotel.Api.Controllers
                 {
                     returnRespone.returnCode = 404;
                     returnRespone.returnMessage = "Khách sạn không tìm thấy";
-                    return BadRequest(returnRespone);
+                    return NotFound(returnRespone);
+                }
+                var detailHotel = _unitOfWork.Repository<RoomDetail>().GetByIdAsync(roomRequest.iddetail).Result;
+                if (detailHotel == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Chi tiết phòng không tìm thấy";
+                    return NotFound(returnRespone);
+                }
+                //if (roomRequest.Images==null)
+                //{
+                //    returnRespone.returnCode = 400;
+                //    returnRespone.returnMessage = "Vui lòng chọn ảnh";
+                //    return BadRequest(returnRespone);
+
+                //}
+
+                var bed = _unitOfWork.Repository<Bed>().GetByIdAsync(roomRequest.idBed).Result;
+                if (bed == null)
+                {
+                    returnRespone.returnCode = 404;
+                    returnRespone.returnMessage = "Loại giường không tìm thấy";
+                    return NotFound(returnRespone);
                 }
                 returnRespone = _roomService.UpdateRoom(id,roomRequest).Result;
                 return Ok(returnRespone);
