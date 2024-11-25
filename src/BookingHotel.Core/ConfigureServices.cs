@@ -84,6 +84,12 @@ namespace BookingHotel.Core
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<AuthService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IContactService, ContactService>();
+            services.AddScoped<IAddressService, AddressService>();
+            services.AddScoped<IRoomDetailService, RoomDetailService>();
+            services.AddScoped<IBookingGenericRepository, BookingGenericRepository>();
+            services.AddScoped<BookingService>();
 
             return services;
         }
