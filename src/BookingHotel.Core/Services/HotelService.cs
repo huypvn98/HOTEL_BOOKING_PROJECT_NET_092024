@@ -33,106 +33,121 @@ namespace BookingHotel.Api.Services
                         h.Description.Contains(keyword, StringComparison.OrdinalIgnoreCase))
             .ToList();
       }
-            var hotelList = from h in hotels
-                            join a in addresses on h.AddressID equals a.AddressID into addressGroup
-                            from ag in addressGroup.DefaultIfEmpty()
-                            select new HotelResponseDto
-                            {
-                                HotelID = h.HotelID,
-                                Address = ag.StreetAddress,
-                                HotelName = h.HotelName,
-                                Description = h.Description,
-                                UrlImage = h.UrlImage,
-                                CreatedDate = h.CreatedDate,
-                                UpdatedDate = h.UpdatedDate,
-                                isActive = h.isActive,
-                                Rooms = h.Rooms,
-                                Staffs = h.Staffs
-                            };
+      var hotelList = from h in hotels
+                      join a in addresses on h.AddressID equals a.AddressID into addressGroup
+                      from ag in addressGroup.DefaultIfEmpty()
+                      select new HotelResponseDto
+                      {
+                        HotelID = h.HotelID,
+                        Address = ag.StreetAddress,
+                        HotelName = h.HotelName,
+                        Description = h.Description,
+                        UrlImage = h.UrlImage,
+                        CreatedDate = h.CreatedDate,
+                        UpdatedDate = h.UpdatedDate,
+                        isActive = h.isActive,
+                        Rooms = h.Rooms,
+                        Staffs = h.Staffs
+                      };
 
       return new ResponseData<IEnumerable<HotelResponseDto>>(200, hotelList, "Success");
     }
 
-    public async Task<ResponseData<Hotel>> GetHotelByIdAsync(int id)
-{
-    // Tìm khách sạn với ID được cung cấp
-    var existingHotel = await _hotelGenericRepository.GetByIdAsync(id);
+    public async Task<ResponseData<HotelResponseDto>> GetHotelByIdAsync(int id)
+    {
+      // Tìm khách sạn với ID được cung cấp
+      var existingHotel = await _hotelGenericRepository.GetByIdAsync(id);
 
-    if (existingHotel == null)
-        return new ResponseData<Hotel>(404, null, $"Hotel with ID {id} not found.");
+      if (existingHotel == null)
+        return new ResponseData<HotelResponseDto>(404, null, $"Hotel with ID {id} not found.");
 
-    // Trả về khách sạn tìm thấy
-    return new ResponseData<Hotel>(200, existingHotel, "Success");
-}
+            var addresses = await _unitOfWork.Repository<Address>().GetByIdAsync(existingHotel.AddressID);
+            
+
+            // Trả về khách sạn tìm thấy
+            return new ResponseData<HotelResponseDto>(200, new HotelResponseDto
+            {
+                HotelID = existingHotel.HotelID,
+                Address = addresses.StreetAddress,
+                HotelName = existingHotel.HotelName,
+                Description = existingHotel.Description,
+                UrlImage = existingHotel.UrlImage,
+                CreatedDate = existingHotel.CreatedDate,
+                UpdatedDate = existingHotel.UpdatedDate,
+                isActive = existingHotel.isActive,
+                Rooms = existingHotel.Rooms,
+                Staffs = existingHotel.Staffs
+            }, "Success");
+    }
     public async Task<ResponseData<Hotel>> InsertHotelAsync(Hotel_InsertRequestData requestData)
     {
-            using (var transaction = await _unitOfWork.BeginTransactionAsync())
-            {
-                try
-                {
-      if (string.IsNullOrWhiteSpace(requestData.HotelName))
-        return new ResponseData<Hotel>(400, null, "HotelName cannot be empty.");
-
-      var hotelNameLower = requestData.HotelName.ToLower();
-
-      // Lấy dữ liệu từ database và chuyển thành bộ nhớ để so sánh
-      var existingHotel = await _hotelGenericRepository
-          .GetAllAsync(h => h.HotelName.ToLower() == hotelNameLower);
-
-      if (existingHotel.Any())
-        return new ResponseData<Hotel>(400, null, "HotelName already exists.");
-
-      // Xử lý ảnh nếu có
-      string imageUrl = null;
-      if (requestData.Image != null)
+      using (var transaction = await _unitOfWork.BeginTransactionAsync())
       {
-        // Thư mục lưu ảnh sẽ là wwwroot/Images/Hotel
-        var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images/Hotel");
-        if (!Directory.Exists(imageDirectory))
+        try
         {
-          Directory.CreateDirectory(imageDirectory);
+          if (string.IsNullOrWhiteSpace(requestData.HotelName))
+            return new ResponseData<Hotel>(400, null, "HotelName cannot be empty.");
+
+          var hotelNameLower = requestData.HotelName.ToLower();
+
+          // Lấy dữ liệu từ database và chuyển thành bộ nhớ để so sánh
+          var existingHotel = await _hotelGenericRepository
+              .GetAllAsync(h => h.HotelName.ToLower() == hotelNameLower);
+
+          if (existingHotel.Any())
+            return new ResponseData<Hotel>(400, null, "HotelName already exists.");
+
+          // Xử lý ảnh nếu có
+          string imageUrl = null;
+          if (requestData.Image != null)
+          {
+            // Thư mục lưu ảnh sẽ là wwwroot/Images/Hotel
+            var imageDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images/Hotel");
+            if (!Directory.Exists(imageDirectory))
+            {
+              Directory.CreateDirectory(imageDirectory);
+            }
+
+            // Tạo tên file duy nhất
+            var fileName = $"{Guid.NewGuid()}_{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(requestData.Image.FileName)}";
+            var filePath = Path.Combine(imageDirectory, fileName);
+
+            // Lưu file ảnh vào thư mục wwwroot/Images/Hotel
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+              await requestData.Image.CopyToAsync(stream);
+            }
+
+            // Đường dẫn URL của ảnh
+            imageUrl = $"/Images/Hotel/{fileName}";
+          }
+
+          var newHotel = new Hotel
+          {
+            CreatedDate = DateTime.UtcNow,
+            HotelName = requestData.HotelName,
+            Description = requestData.Description,
+            AddressID = requestData.AddressID,
+            UrlImage = imageUrl, // Lưu đường dẫn ảnh
+            isActive = true // Khách sạn mới luôn active
+          };
+
+          await _unitOfWork.Repository<Hotel>().AddAsync(newHotel);
+          await _unitOfWork.SaveChangesAsync();
+
+          await transaction.CommitAsync();
+          return new ResponseData<Hotel>(201, newHotel, "Hotel added successfully.");
+
+        }
+        catch (Exception ex)
+        {
+          await transaction.RollbackAsync();
+          throw new Exception("Address creation failed: " + ex.Message);
         }
 
-        // Tạo tên file duy nhất
-        var fileName = $"{Guid.NewGuid()}_{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(requestData.Image.FileName)}";
-        var filePath = Path.Combine(imageDirectory, fileName);
 
-        // Lưu file ảnh vào thư mục wwwroot/Images/Hotel
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-          await requestData.Image.CopyToAsync(stream);
-        }
-
-        // Đường dẫn URL của ảnh
-        imageUrl = $"/Images/Hotel/{fileName}";
       }
 
-      var newHotel = new Hotel
-      {
-        CreatedDate = DateTime.UtcNow,
-        HotelName = requestData.HotelName,
-        Description = requestData.Description,
-                        AddressID = requestData.AddressID,
-        UrlImage = imageUrl, // Lưu đường dẫn ảnh
-        isActive = true // Khách sạn mới luôn active
-      };
-
-      await _unitOfWork.Repository<Hotel>().AddAsync(newHotel);
-      await _unitOfWork.SaveChangesAsync();
-
-                    await transaction.CommitAsync();
-      return new ResponseData<Hotel>(201, newHotel, "Hotel added successfully.");
-
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    throw new Exception("Address creation failed: " + ex.Message);
-                }
-                
-
-            }
-                
     }
     public async Task<ResponseData<string>> UpdateHotelAsync(int id, Hotel_InsertRequestData requestData)
     {
@@ -157,6 +172,7 @@ namespace BookingHotel.Api.Services
       // Cập nhật tên và mô tả khách sạn
       existingHotel.HotelName = requestData.HotelName;
       existingHotel.Description = requestData.Description;
+            existingHotel.AddressID = requestData.AddressID;
       existingHotel.UpdatedDate = DateTime.UtcNow.AddHours(7);
       // Xử lý ảnh nếu có
       if (requestData.Image != null)
